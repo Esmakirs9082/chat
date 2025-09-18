@@ -2,6 +2,15 @@
 /* @tailwind components; */
 /* @tailwind utilities; */
 
+/* Утилиты для text truncation */
+.line-clamp-2 {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
 /* Анимации для TypingIndicator */
 @keyframes fade-in {
   from {
