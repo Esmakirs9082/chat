@@ -293,7 +293,11 @@ const CharactersPage: React.FC = () => {
           {/* Character Gallery */}
           <div className="flex-1 overflow-auto">
             <div className="p-6">
-              <CharacterGallery viewMode={viewMode} />
+              <CharacterGallery 
+                onCharacterSelect={(character) => {
+                  window.location.href = `/chat/${character.id}`;
+                }}
+              />
             </div>
           </div>
         </div>

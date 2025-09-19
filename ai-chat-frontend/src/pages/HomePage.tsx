@@ -137,13 +137,14 @@ const HomePage: React.FC = () => {
                 >
                   <CharacterCard 
                     character={character}
-                    onClick={() => {
+                    onSelect={() => {
                       if (isAuthenticated) {
                         window.location.href = `/chat/${character.id}`;
                       } else {
                         openAuthModal('login');
                       }
                     }}
+                    showStats={true}
                   />
                 </div>
               ))}

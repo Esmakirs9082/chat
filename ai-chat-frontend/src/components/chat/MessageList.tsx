@@ -151,11 +151,10 @@ const MessageList: React.FC<MessageListProps> = ({
         ))}
         {showTyping && (
           <TypingIndicator
-            character={character}
-            isVisible={showTyping}
-            variant="bubble"
-            timeout={8000}
-            onTimeout={() => {}}
+            characterName={character?.name || 'Собеседник'}
+            isTyping={showTyping}
+            avatar={character?.avatar}
+            className="mb-4"
           />
         )}
         <div ref={messagesEndRef} />

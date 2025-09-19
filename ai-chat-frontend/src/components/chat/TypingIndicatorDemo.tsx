@@ -93,14 +93,10 @@ const TypingIndicatorDemo: React.FC = () => {
         
         <div className="bg-gray-50 p-6 rounded-lg min-h-[100px]">
           <TypingIndicator
-            character={demoCharacter}
-            isVisible={showBubble}
-            variant="bubble"
-            timeout={5000}
-            onTimeout={() => {
-              setShowBubble(false);
-              console.log('Bubble indicator timed out');
-            }}
+            characterName={demoCharacter.name}
+            isTyping={showBubble}
+            avatar={demoCharacter.avatar}
+            personality="friendly"
           />
         </div>
       </div>
@@ -119,14 +115,10 @@ const TypingIndicatorDemo: React.FC = () => {
         
         <div className="bg-gray-50 p-6 rounded-lg">
           <TypingIndicator
-            character={demoCharacter}
-            isVisible={showInline}
-            variant="inline"
-            timeout={7000}
-            onTimeout={() => {
-              setShowInline(false);
-              console.log('Inline indicator timed out');
-            }}
+            characterName={demoCharacter.name}
+            isTyping={showInline}
+            avatar={demoCharacter.avatar}
+            personality="mysterious"
           />
         </div>
       </div>
@@ -145,15 +137,9 @@ const TypingIndicatorDemo: React.FC = () => {
         
         <div className="bg-gray-50 p-6 rounded-lg">
           <TypingIndicator
-            character={demoCharacter}
-            isVisible={showMinimal}
-            variant="minimal"
-            showAvatar={false}
-            timeout={4000}
-            onTimeout={() => {
-              setShowMinimal(false);
-              console.log('Minimal indicator timed out');
-            }}
+            characterName={demoCharacter.name}
+            isTyping={showMinimal}
+            personality="professional"
           />
         </div>
       </div>
@@ -172,14 +158,13 @@ const TypingIndicatorDemo: React.FC = () => {
         
         <div className="bg-gray-50 p-6 rounded-lg">
           <MultipleTypingIndicator
-            characters={demoCharacters}
-            isVisible={showMultiple}
-            timeout={6000}
+            typingUsers={demoCharacters.map(char => ({
+              id: char.id,
+              name: char.name,
+              avatar: char.avatar
+            }))}
             maxVisible={2}
-            onTimeout={() => {
-              setShowMultiple(false);
-              console.log('Multiple indicator timed out');
-            }}
+            className={showMultiple ? '' : 'hidden'}
           />
         </div>
       </div>
@@ -204,10 +189,10 @@ const TypingIndicatorDemo: React.FC = () => {
         <div className="bg-gray-50 p-6 rounded-lg">
           {isTyping && (
             <TypingIndicator
-              character={demoCharacter}
-              isVisible={isTyping}
-              variant="inline"
-              timeout={0} // Управляется хуком
+              characterName={demoCharacter.name}
+              isTyping={isTyping}
+              avatar={demoCharacter.avatar}
+              personality="playful"
             />
           )}
           {!isTyping && (

@@ -84,7 +84,14 @@ const DashboardPage: React.FC = () => {
           {favoriteCharacters.length > 0 ? (
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
               {favoriteCharacters.map(character => (
-                <CharacterCard key={character.id} character={character} />
+                <CharacterCard 
+                  key={character.id} 
+                  character={character} 
+                  onSelect={() => {
+                    window.location.href = `/chat/${character.id}`;
+                  }}
+                  showStats={true}
+                />
               ))}
             </div>
           ) : (
