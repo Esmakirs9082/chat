@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef, useCallback } from 'react';
 import { cn } from '../../utils';
 
 interface TypingIndicatorProps {
@@ -116,7 +116,7 @@ const TypingIndicator: React.FC<TypingIndicatorProps> = ({
         </div>
       </div>
 
-      <style jsx>{`
+      <style>{`
         @keyframes fadeIn {
           from {
             opacity: 0;
@@ -144,3 +144,111 @@ const TypingIndicator: React.FC<TypingIndicatorProps> = ({
 };
 
 export default TypingIndicator;
+
+// Hook для управления состоянием индикатора печатания
+export const useTypingIndicator = (autoHideTimeout: number = 3000) => {
+  const [isTyping, setIsTyping] = useState(false);
+  const timeoutRef = useRef<NodeJS.Timeout | null>(null);
+
+  const showTyping = useCallback(() => {
+    setIsTyping(true);
+    
+    if (timeoutRef.current) {
+      clearTimeout(timeoutRef.current);
+    }
+    
+    timeoutRef.current = setTimeout(() => {
+      setIsTyping(false);
+    }, autoHideTimeout);
+  }, [autoHideTimeout]);
+
+  const hideTyping = useCallback(() => {
+    setIsTyping(false);
+    if (timeoutRef.current) {
+      clearTimeout(timeoutRef.current);
+    }
+  }, []);
+
+  const toggleTyping = useCallback(() => {
+    if (isTyping) {
+      hideTyping();
+    } else {
+      showTyping();
+    }
+  }, [isTyping, showTyping, hideTyping]);
+
+  useEffect(() => {
+    return () => {
+      if (timeoutRef.current) {
+        clearTimeout(timeoutRef.current);
+      }
+    };
+  }, []);
+
+  return {
+    isTyping,
+    showTyping,
+    hideTyping,
+    toggleTyping
+  };
+};
+
+// Компонент для отображения множественных индикаторов печатания
+interface MultipleTypingIndicatorProps {
+  typingUsers: Array<{
+    id: string;
+    name: string;
+    avatar?: string;
+  }>;
+  maxVisible?: number;
+  className?: string;
+}
+
+export const MultipleTypingIndicator: React.FC<MultipleTypingIndicatorProps> = ({
+  typingUsers,
+  maxVisible = 3,
+  className = ''
+}) => {
+  if (typingUsers.length === 0) return null;
+
+  const visibleUsers = typingUsers.slice(0, maxVisible);
+  const hiddenCount = typingUsers.length - maxVisible;
+
+  const getTypingText = () => {
+    if (typingUsers.length === 1) {
+      return `${typingUsers[0].name} печатает...`;
+    } else if (typingUsers.length === 2) {
+      return `${typingUsers[0].name} и ${typingUsers[1].name} печатают...`;
+    } else {
+      return `${visibleUsers.map(u => u.name).join(', ')}${hiddenCount > 0 ? ` и еще ${hiddenCount}` : ''} печатают...`;
+    }
+  };
+
+  return (
+    <div className={`flex items-center space-x-2 px-4 py-2 bg-gray-100 rounded-lg ${className}`}>
+      <div className="flex -space-x-1">
+        {visibleUsers.map((user) => (
+          <div
+            key={user.id}
+            className="w-6 h-6 rounded-full bg-gray-300 border-2 border-white flex items-center justify-center text-xs font-semibold text-gray-600"
+          >
+            {user.avatar ? (
+              <img src={user.avatar} alt={user.name} className="w-full h-full rounded-full object-cover" />
+            ) : (
+              user.name.charAt(0).toUpperCase()
+            )}
+          </div>
+        ))}
+      </div>
+      
+      <div className="flex items-center space-x-2">
+        <span className="text-sm text-gray-600">{getTypingText()}</span>
+        <div className="flex space-x-1">
+          <div className="w-1.5 h-1.5 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0ms' }}></div>
+          <div className="w-1.5 h-1.5 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '150ms' }}></div>
+          <div className="w-1.5 h-1.5 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '300ms' }}></div>
+        </div>
+      </div>
+    </div>
+  );
+};
