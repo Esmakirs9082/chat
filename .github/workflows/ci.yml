@@ -81,7 +81,7 @@ jobs:
       
       - name: 📊 Upload coverage to Codecov
         if: success()
-        uses: codecov/codecov-action@v3
+        uses: codecov/codecov-action@v5
         with:
           working-directory: ${{ env.WORKING_DIRECTORY }}
           files: ./coverage/lcov.info
