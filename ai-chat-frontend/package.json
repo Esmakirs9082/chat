@@ -80,14 +80,5 @@
     "ts-jest": "^29.1.1",
     "typescript": "^5.4.5",
     "vite": "^4.4.9"
-  },
-  "lint-staged": {
-    "src/**/*.{ts,tsx}": [
-      "eslint --fix",
-      "prettier --write"
-    ],
-    "src/**/*.{json,md}": [
-      "prettier --write"
-    ]
   }
 }
