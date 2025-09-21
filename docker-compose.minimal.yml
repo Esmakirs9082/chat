@@ -1,0 +1,33 @@
+# Docker Compose - минималистичная и гибкая конфигурация
+version: '3.8'
+
+services:
+  frontend:
+    build:
+      context: ./ai-chat-frontend
+      dockerfile: Dockerfile
+      # Кэширование слоев для быстрой пересборки
+      cache_from:
+        - node:18-alpine
+        - nginx:alpine
+    ports:
+      - "3000:80"
+    environment:
+      - NODE_ENV=production
+    # Опциональный volume для development (раскомментировать при необходимости)
+    # volumes:
+    #   - ./ai-chat-frontend/dist:/usr/share/nginx/html:ro
+    restart: unless-stopped
+    
+    # Healthcheck для проверки готовности
+    healthcheck:
+      test: ["CMD-SHELL", "wget -q --spider http://localhost/ || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+    
+    # Labels для идентификации
+    labels:
+      - "com.ai-chat.service=frontend"
+      - "com.ai-chat.version=1.0.0"

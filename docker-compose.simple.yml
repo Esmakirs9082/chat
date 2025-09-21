@@ -1,0 +1,21 @@
+# Docker Compose - простая конфигурация для быстрого старта
+version: '3.8'
+
+services:
+  frontend:
+    build:
+      context: ./ai-chat-frontend
+      dockerfile: Dockerfile
+    ports:
+      - "3000:80"
+    environment:
+      - NODE_ENV=production
+    restart: unless-stopped
+    
+    # Healthcheck с улучшенной производительностью
+    healthcheck:
+      test: ["CMD-SHELL", "wget -q --spider http://localhost/ || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s

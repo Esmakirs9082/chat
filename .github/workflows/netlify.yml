@@ -1,0 +1,142 @@
+# Netlify Deployment Workflow
+name: Netlify Deploy
+
+on:
+  push:
+    branches: [main, develop]
+    paths:
+      - 'ai-chat-frontend/**'
+  pull_request:
+    branches: [main]
+    paths:
+      - 'ai-chat-frontend/**'
+  workflow_dispatch:
+
+env:
+  NODE_VERSION: '18'
+  WORKING_DIRECTORY: './ai-chat-frontend'
+
+jobs:
+  # =====================================
+  # Build and Deploy
+  # =====================================
+  deploy:
+    name: 🚀 Deploy to Netlify
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: 📥 Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      
+      - name: 📦 Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+          cache-dependency-path: '${{ env.WORKING_DIRECTORY }}/package-lock.json'
+      
+      - name: 🔧 Install dependencies
+        working-directory: ${{ env.WORKING_DIRECTORY }}
+        run: npm ci --prefer-offline --no-audit
+      
+      - name: 🧪 Run tests
+        working-directory: ${{ env.WORKING_DIRECTORY }}
+        run: npm run test:ci
+      
+      - name: 📝 Run type check
+        working-directory: ${{ env.WORKING_DIRECTORY }}
+        run: npm run type-check
+      
+      - name: 🧹 Run linting
+        working-directory: ${{ env.WORKING_DIRECTORY }}
+        run: npm run lint
+      
+      - name: 🏗️ Build application
+        working-directory: ${{ env.WORKING_DIRECTORY }}
+        run: npm run build
+        env:
+          NODE_ENV: production
+          VITE_API_URL: ${{ github.ref == 'refs/heads/main' && secrets.PROD_API_URL || secrets.STAGING_API_URL }}
+          VITE_WS_URL: ${{ github.ref == 'refs/heads/main' && secrets.PROD_WS_URL || secrets.STAGING_WS_URL }}
+          VITE_STRIPE_KEY: ${{ github.ref == 'refs/heads/main' && secrets.PROD_STRIPE_KEY || secrets.STAGING_STRIPE_KEY }}
+          VITE_APP_ENV: ${{ github.ref == 'refs/heads/main' && 'production' || 'staging' }}
+      
+      - name: 🚀 Deploy to Netlify
+        uses: nwtgck/actions-netlify@v2.1
+        with:
+          publish-dir: '${{ env.WORKING_DIRECTORY }}/dist'
+          production-branch: main
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          deploy-message: |
+            Deploy from GitHub Actions
+            Commit: ${{ github.sha }}
+            Branch: ${{ github.ref_name }}
+            Author: ${{ github.actor }}
+          enable-pull-request-comment: true
+          enable-commit-comment: true
+          enable-commit-status: true
+          overwrites-pull-request-comment: true
+        env:
+          NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_AUTH_TOKEN }}
+          NETLIFY_SITE_ID: ${{ secrets.NETLIFY_SITE_ID }}
+        timeout-minutes: 10
+
+  # =====================================
+  # Lighthouse Performance Audit
+  # =====================================
+  lighthouse:
+    name: 🔍 Lighthouse Audit
+    needs: deploy
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request'
+    
+    steps:
+      - name: 📥 Checkout code
+        uses: actions/checkout@v4
+      
+      - name: 🔍 Run Lighthouse CI
+        uses: treosh/lighthouse-ci-action@v10
+        with:
+          configPath: './ai-chat-frontend/.lighthouserc.json'
+          uploadArtifacts: true
+          temporaryPublicStorage: true
+        env:
+          LHCI_GITHUB_APP_TOKEN: ${{ secrets.LHCI_GITHUB_APP_TOKEN }}
+
+  # =====================================
+  # Security Scan
+  # =====================================
+  security:
+    name: 🛡️ Security Scan
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request'
+    
+    steps:
+      - name: 📥 Checkout code
+        uses: actions/checkout@v4
+      
+      - name: 📦 Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+          cache-dependency-path: '${{ env.WORKING_DIRECTORY }}/package-lock.json'
+      
+      - name: 🔧 Install dependencies
+        working-directory: ${{ env.WORKING_DIRECTORY }}
+        run: npm ci --prefer-offline --no-audit
+      
+      - name: 🔒 Run security audit
+        working-directory: ${{ env.WORKING_DIRECTORY }}
+        run: npm audit --audit-level high
+        continue-on-error: true
+      
+      - name: 🔍 Run dependency scan
+        uses: snyk/actions/node@master
+        continue-on-error: true
+        env:
+          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+        with:
+          args: --severity-threshold=high --file=${{ env.WORKING_DIRECTORY }}/package.json

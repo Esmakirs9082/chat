@@ -1,0 +1,134 @@
+# Быстрая проверка Pull Request
+name: PR Check
+
+on:
+  pull_request:
+    branches: [main, develop]
+    paths:
+      - 'ai-chat-frontend/**'
+    types: [opened, synchronize, reopened, ready_for_review]
+
+# Отменяем предыдущие запуски для той же PR
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+env:
+  NODE_VERSION: '18'
+  WORKING_DIRECTORY: './ai-chat-frontend'
+
+jobs:
+  pr-check:
+    name: 🔍 PR Quick Check
+    runs-on: ubuntu-latest
+    if: github.event.pull_request.draft == false
+    
+    steps:
+      - name: 📥 Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      
+      - name: 📦 Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+          cache-dependency-path: '${{ env.WORKING_DIRECTORY }}/package-lock.json'
+      
+      - name: 🔧 Install dependencies
+        working-directory: ${{ env.WORKING_DIRECTORY }}
+        run: npm ci --prefer-offline --no-audit
+      
+      - name: 🔍 Get changed files
+        id: changed-files
+        uses: tj-actions/changed-files@v40
+        with:
+          files: |
+            ai-chat-frontend/src/**/*.{ts,tsx}
+            ai-chat-frontend/package*.json
+            ai-chat-frontend/tsconfig*.json
+      
+      - name: 📝 Type check (changed files only)
+        if: steps.changed-files.outputs.any_changed == 'true'
+        working-directory: ${{ env.WORKING_DIRECTORY }}
+        run: npm run type-check
+      
+      - name: 🧹 Lint (changed files only)
+        if: steps.changed-files.outputs.any_changed == 'true'
+        working-directory: ${{ env.WORKING_DIRECTORY }}
+        run: |
+          echo "Checking changed files:"
+          echo "${{ steps.changed-files.outputs.all_changed_files }}"
+          npm run lint
+      
+      - name: 💅 Format check (changed files only)
+        if: steps.changed-files.outputs.any_changed == 'true'
+        working-directory: ${{ env.WORKING_DIRECTORY }}
+        run: npm run format:check
+      
+      - name: 🏗️ Build check
+        if: steps.changed-files.outputs.any_changed == 'true'
+        working-directory: ${{ env.WORKING_DIRECTORY }}
+        run: npm run build
+      
+      - name: 📊 Bundle size analysis
+        if: steps.changed-files.outputs.any_changed == 'true'
+        working-directory: ${{ env.WORKING_DIRECTORY }}
+        run: |
+          echo "📦 Bundle analysis:"
+          du -sh dist/
+          find dist/assets -name "*.js" -exec basename {} \; | head -10
+      
+      - name: ✅ PR Status Comment
+        if: always()
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const { data: comments } = await github.rest.issues.listComments({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+            });
+            
+            const botComment = comments.find(comment => 
+              comment.user.login === 'github-actions[bot]' && 
+              comment.body.includes('PR Check Results')
+            );
+            
+            const status = '${{ job.status }}';
+            const emoji = status === 'success' ? '✅' : '❌';
+            
+            const commentBody = `${emoji} **PR Check Results**
+            
+            **Status:** ${status}
+            **Changed Files:** ${{ steps.changed-files.outputs.all_changed_files_count }}
+            **Commit:** \`${{ github.event.pull_request.head.sha }}\`
+            
+            ${status === 'success' ? 
+              '🎉 All checks passed! This PR is ready for review.' : 
+              '⚠️ Some checks failed. Please review the logs above.'}
+            
+            <details>
+            <summary>📁 Changed Files</summary>
+            
+            \`\`\`
+            ${{ steps.changed-files.outputs.all_changed_files }}
+            \`\`\`
+            </details>`;
+            
+            if (botComment) {
+              await github.rest.issues.updateComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                comment_id: botComment.id,
+                body: commentBody
+              });
+            } else {
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: context.issue.number,
+                body: commentBody
+              });
+            }
