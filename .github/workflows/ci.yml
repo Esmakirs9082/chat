@@ -194,7 +194,7 @@ jobs:
         uses: actions/checkout@v4
       
       - name: 📦 Download build artifacts
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v5
         with:
           name: dist-staging
           path: ${{ env.WORKING_DIRECTORY }}/dist
@@ -224,7 +224,7 @@ jobs:
         uses: actions/checkout@v4
       
       - name: 📦 Download build artifacts
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v5
         with:
           name: dist-production
           path: ${{ env.WORKING_DIRECTORY }}/dist
