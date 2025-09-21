@@ -4,11 +4,11 @@ import { ThemeProvider } from './components/ThemeProvider';
 
 const queryClient = new QueryClient();
 
-const AppProviders: React.FC<{ children: React.ReactNode }> = ({ children }) => (
+const AppProviders: React.FC<{ children: React.ReactNode }> = ({
+  children,
+}) => (
   <QueryClientProvider client={queryClient}>
-    <ThemeProvider>
-      {children}
-    </ThemeProvider>
+    <ThemeProvider>{children}</ThemeProvider>
   </QueryClientProvider>
 );
 

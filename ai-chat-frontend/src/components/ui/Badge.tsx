@@ -1,7 +1,13 @@
 import React from 'react';
 import clsx from 'clsx';
 
-export type BadgeVariant = 'default' | 'success' | 'warning' | 'error' | 'premium' | 'nsfw';
+export type BadgeVariant =
+  | 'default'
+  | 'success'
+  | 'warning'
+  | 'error'
+  | 'premium'
+  | 'nsfw';
 export type BadgeSize = 'sm' | 'md' | 'lg';
 
 interface BadgeProps {

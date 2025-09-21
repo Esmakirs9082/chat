@@ -38,11 +38,13 @@ const Avatar: React.FC<AvatarProps> = ({
   className = '',
 }) => {
   return (
-    <div className={clsx(
-      'relative inline-flex items-center justify-center rounded-full bg-gray-800 dark:bg-gray-700 text-white font-semibold select-none',
-      sizeClasses[size],
-      className
-    )}>
+    <div
+      className={clsx(
+        'relative inline-flex items-center justify-center rounded-full bg-gray-800 dark:bg-gray-700 text-white font-semibold select-none',
+        sizeClasses[size],
+        className
+      )}
+    >
       {src ? (
         <img
           src={src}

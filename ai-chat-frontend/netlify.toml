@@ -1,0 +1,175 @@
+# AI Chat Frontend - Netlify Configuration
+[build]
+  base = "ai-chat-frontend"
+  publish = "dist"
+  command = "npm run build"
+  functions = "netlify/functions"
+
+[build.environment]
+  NODE_VERSION = "18"
+  NPM_FLAGS = "--prefer-offline --no-audit"
+  NODE_ENV = "production"
+
+# =====================================
+# Build Plugins
+# =====================================
+[[plugins]]
+  package = "netlify-plugin-submit-sitemap"
+  
+  [plugins.inputs]
+    baseUrl = "https://ai-chat.netlify.app"
+    sitemapPath = "/sitemap.xml"
+    ignorePeriod = 0
+    providers = [
+      "google",
+      "bing",
+      "yandex"
+    ]
+
+[[plugins]]
+  package = "@netlify/plugin-lighthouse"
+  
+  [plugins.inputs]
+    output_path = "reports/lighthouse.html"
+
+# =====================================
+# API Proxying & Redirects
+# =====================================
+[[redirects]]
+  from = "/api/*"
+  to = "https://api.ai-chat.com/api/:splat"
+  status = 200
+  force = true
+  headers = {X-From = "Netlify"}
+
+[[redirects]]
+  from = "/ws"
+  to = "wss://ws.ai-chat.com"
+  status = 200
+  force = true
+
+# Health check endpoint
+[[redirects]]
+  from = "/health"
+  to = "/.netlify/functions/health"
+  status = 200
+
+# SPA fallback - должен быть последним
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
+
+# =====================================
+# Security Headers
+# =====================================
+[[headers]]
+  for = "/*"
+  [headers.values]
+    X-Frame-Options = "DENY"
+    X-Content-Type-Options = "nosniff"
+    X-XSS-Protection = "1; mode=block"
+    Referrer-Policy = "strict-origin-when-cross-origin"
+    Strict-Transport-Security = "max-age=31536000; includeSubDomains"
+    Content-Security-Policy = "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://js.stripe.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; connect-src 'self' https://api.ai-chat.com wss://ws.ai-chat.com https://api.stripe.com; font-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'"
+
+# Static assets - aggressive caching
+[[headers]]
+  for = "/assets/*"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
+    Access-Control-Allow-Origin = "*"
+
+# JS/CSS files with hashes
+[[headers]]
+  for = "/*.js"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
+
+[[headers]]
+  for = "/*.css"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
+
+# Images and fonts
+[[headers]]
+  for = "/*.@(jpg|jpeg|png|gif|webp|avif|svg)"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
+
+[[headers]]
+  for = "/*.@(woff|woff2|ttf|eot)"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
+
+# HTML files - no cache
+[[headers]]
+  for = "/*.html"
+  [headers.values]
+    Cache-Control = "public, max-age=0, must-revalidate"
+
+# Favicon and robots
+[[headers]]
+  for = "/favicon.ico"
+  [headers.values]
+    Cache-Control = "public, max-age=86400"
+
+[[headers]]
+  for = "/robots.txt"
+  [headers.values]
+    Cache-Control = "public, max-age=86400"
+
+[[headers]]
+  for = "/sitemap.xml"
+  [headers.values]
+    Cache-Control = "public, max-age=3600"
+
+# =====================================
+# Environment Variables
+# =====================================
+[context.production.environment]
+  VITE_API_URL = "https://api.ai-chat.com"
+  VITE_WS_URL = "wss://ws.ai-chat.com"
+  VITE_APP_ENV = "production"
+  VITE_SENTRY_DSN = "https://your-sentry-dsn@sentry.io/project"
+
+[context.deploy-preview.environment]
+  VITE_API_URL = "https://api-staging.ai-chat.com"
+  VITE_WS_URL = "wss://ws-staging.ai-chat.com"
+  VITE_APP_ENV = "staging"
+  VITE_SENTRY_DSN = "https://your-staging-sentry-dsn@sentry.io/project"
+
+[context.branch-deploy.environment]
+  VITE_API_URL = "https://api-dev.ai-chat.com"
+  VITE_WS_URL = "wss://ws-dev.ai-chat.com"
+  VITE_APP_ENV = "development"
+
+# =====================================
+# Forms & Functions
+# =====================================
+# Contact form (если понадобится)
+[[forms]]
+  name = "contact"
+  action = "/thank-you"
+  method = "POST"
+
+# =====================================
+# Deploy Contexts
+# =====================================
+[context.production]
+  command = "npm run build"
+  
+  [context.production.environment]
+    NODE_ENV = "production"
+
+[context.deploy-preview]
+  command = "npm run build"
+  
+  [context.deploy-preview.environment]
+    NODE_ENV = "production"
+
+[context.branch-deploy]
+  command = "npm run build"
+  
+  [context.branch-deploy.environment]
+    NODE_ENV = "development"

@@ -1,7 +1,11 @@
 import { create } from 'zustand';
 import { immer } from 'zustand/middleware/immer';
 import { persist } from 'zustand/middleware';
-import { Subscription, SubscriptionPlan, PaymentHistory } from '../types/subscription';
+import {
+  Subscription,
+  SubscriptionPlan,
+  PaymentHistory,
+} from '../types/subscription';
 
 // Интерфейс для текущего использования
 interface CurrentUsage {
@@ -27,6 +31,7 @@ interface SubscriptionActions {
   loadPaymentHistory: () => Promise<void>;
   checkUsageLimits: () => boolean;
   updatePaymentMethod: (method: string) => Promise<void>;
+  reset: () => void;
 }
 
 // Computed properties
@@ -38,7 +43,9 @@ interface SubscriptionComputed {
   remainingMessages: number;
 }
 
-export const useSubscriptionStore = create<SubscriptionState & SubscriptionActions & SubscriptionComputed>()(
+export const useSubscriptionStore = create<
+  SubscriptionState & SubscriptionActions & SubscriptionComputed
+>()(
   persist(
     immer((set, get) => ({
       // State
@@ -48,7 +55,7 @@ export const useSubscriptionStore = create<SubscriptionState & SubscriptionActio
       isLoading: false,
       currentUsage: {
         chatsToday: 0,
-        messagesThisMonth: 0
+        messagesThisMonth: 0,
       },
 
       // Computed properties
@@ -71,31 +78,34 @@ export const useSubscriptionStore = create<SubscriptionState & SubscriptionActio
       get remainingChats() {
         const { subscription, currentUsage } = get();
         if (!subscription || !get().isActive) return 0;
-        
-        const plan = get().plans.find(p => p.id === subscription.type);
+
+        const plan = get().plans.find((p) => p.id === subscription.type);
         if (!plan) return 0;
-        
+
         return Math.max(0, plan.maxChatsPerDay - currentUsage.chatsToday);
       },
 
       get remainingMessages() {
         const { subscription, currentUsage } = get();
         if (!subscription || !get().isActive) return 0;
-        
-        const plan = get().plans.find(p => p.id === subscription.type);
+
+        const plan = get().plans.find((p) => p.id === subscription.type);
         if (!plan) return 0;
-        
-        return Math.max(0, plan.maxMessagesPerChat - currentUsage.messagesThisMonth);
+
+        return Math.max(
+          0,
+          plan.maxMessagesPerChat - currentUsage.messagesThisMonth
+        );
       },
 
       // Actions
       loadSubscription: async () => {
         set({ isLoading: true });
-        
+
         try {
           // TODO: Реальный API вызов
           // const subscription = await subscriptionApi.getCurrentSubscription();
-          
+
           // Мок данные для демонстрации
           const mockSubscription: Subscription | null = {
             type: 'basic',
@@ -103,11 +113,10 @@ export const useSubscriptionStore = create<SubscriptionState & SubscriptionActio
             startDate: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000), // 30 дней назад
             expiresAt: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000), // через 30 дней
             autoRenew: true,
-            paymentMethod: 'card'
+            paymentMethod: 'card',
           };
 
           set({ subscription: mockSubscription });
-
         } catch (error) {
           console.error('Failed to load subscription:', error);
         } finally {
@@ -117,11 +126,11 @@ export const useSubscriptionStore = create<SubscriptionState & SubscriptionActio
 
       loadPlans: async () => {
         set({ isLoading: true });
-        
+
         try {
           // TODO: Реальный API вызов
           // const plans = await subscriptionApi.getPlans();
-          
+
           // Мок данные для демонстрации
           const mockPlans: SubscriptionPlan[] = [
             {
@@ -133,34 +142,43 @@ export const useSubscriptionStore = create<SubscriptionState & SubscriptionActio
               maxChatsPerDay: 3,
               maxMessagesPerChat: 100,
               nsfwAccess: false,
-              prioritySupport: false
+              prioritySupport: false,
             },
             {
               id: 'basic',
               name: 'Базовый',
               price: 9.99,
               currency: 'USD',
-              features: ['50 чатов в день', '2000 сообщений в месяц', 'NSFW контент', 'Создание персонажей'],
+              features: [
+                '50 чатов в день',
+                '2000 сообщений в месяц',
+                'NSFW контент',
+                'Создание персонажей',
+              ],
               maxChatsPerDay: 50,
               maxMessagesPerChat: 2000,
               nsfwAccess: true,
-              prioritySupport: false
+              prioritySupport: false,
             },
             {
               id: 'premium',
               name: 'Премиум',
               price: 19.99,
               currency: 'USD',
-              features: ['Безлимитные чаты', 'Безлимитные сообщения', 'NSFW контент', 'Приоритетная поддержка'],
+              features: [
+                'Безлимитные чаты',
+                'Безлимитные сообщения',
+                'NSFW контент',
+                'Приоритетная поддержка',
+              ],
               maxChatsPerDay: -1, // безлимит
               maxMessagesPerChat: -1, // безлимит
               nsfwAccess: true,
-              prioritySupport: true
-            }
+              prioritySupport: true,
+            },
           ];
 
           set({ plans: mockPlans });
-
         } catch (error) {
           console.error('Failed to load plans:', error);
         } finally {
@@ -170,11 +188,11 @@ export const useSubscriptionStore = create<SubscriptionState & SubscriptionActio
 
       subscribe: async (planId: string, paymentMethod: string) => {
         set({ isLoading: true });
-        
+
         try {
           // TODO: Реальный API вызов
           // const subscription = await subscriptionApi.subscribe(planId, paymentMethod);
-          
+
           // Мок создания подписки
           const newSubscription: Subscription = {
             type: planId as 'free' | 'basic' | 'premium',
@@ -182,7 +200,7 @@ export const useSubscriptionStore = create<SubscriptionState & SubscriptionActio
             startDate: new Date(),
             expiresAt: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000), // через 30 дней
             autoRenew: true,
-            paymentMethod: paymentMethod as 'card' | 'paypal' | 'crypto'
+            paymentMethod: paymentMethod as 'card' | 'paypal' | 'crypto',
           };
 
           set({ subscription: newSubscription });
@@ -190,18 +208,17 @@ export const useSubscriptionStore = create<SubscriptionState & SubscriptionActio
           // Добавляем запись в историю платежей
           const paymentRecord: PaymentHistory = {
             id: `payment-${Date.now()}`,
-            amount: get().plans.find(p => p.id === planId)?.price || 0,
+            amount: get().plans.find((p) => p.id === planId)?.price || 0,
             currency: 'USD',
             status: 'paid',
             paymentMethod,
             createdAt: new Date(),
-            subscriptionType: planId
+            subscriptionType: planId,
           };
 
           set((state) => {
             state.paymentHistory.unshift(paymentRecord);
           });
-
         } catch (error) {
           console.error('Failed to subscribe:', error);
           throw error;
@@ -212,18 +229,17 @@ export const useSubscriptionStore = create<SubscriptionState & SubscriptionActio
 
       cancelSubscription: async () => {
         set({ isLoading: true });
-        
+
         try {
           // TODO: Реальный API вызов
           // await subscriptionApi.cancelSubscription();
-          
+
           set((state) => {
             if (state.subscription) {
               state.subscription.isActive = false;
               state.subscription.autoRenew = false;
             }
           });
-
         } catch (error) {
           console.error('Failed to cancel subscription:', error);
           throw error;
@@ -234,11 +250,11 @@ export const useSubscriptionStore = create<SubscriptionState & SubscriptionActio
 
       loadPaymentHistory: async () => {
         set({ isLoading: true });
-        
+
         try {
           // TODO: Реальный API вызов
           // const history = await subscriptionApi.getPaymentHistory();
-          
+
           // Мок данные для демонстрации
           const mockHistory: PaymentHistory[] = [
             {
@@ -248,7 +264,7 @@ export const useSubscriptionStore = create<SubscriptionState & SubscriptionActio
               status: 'paid',
               paymentMethod: 'card_****1234',
               createdAt: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000), // неделю назад
-              subscriptionType: 'basic'
+              subscriptionType: 'basic',
             },
             {
               id: 'payment-2',
@@ -257,12 +273,11 @@ export const useSubscriptionStore = create<SubscriptionState & SubscriptionActio
               status: 'paid',
               paymentMethod: 'card_****1234',
               createdAt: new Date(Date.now() - 37 * 24 * 60 * 60 * 1000), // месяц назад
-              subscriptionType: 'basic'
-            }
+              subscriptionType: 'basic',
+            },
           ];
 
           set({ paymentHistory: mockHistory });
-
         } catch (error) {
           console.error('Failed to load payment history:', error);
         } finally {
@@ -272,19 +287,21 @@ export const useSubscriptionStore = create<SubscriptionState & SubscriptionActio
 
       checkUsageLimits: () => {
         const { subscription, currentUsage } = get();
-        
+
         if (!subscription || !get().isActive) {
           return false; // нет активной подписки
         }
 
-        const plan = get().plans.find(p => p.id === subscription.type);
+        const plan = get().plans.find((p) => p.id === subscription.type);
         if (!plan) return false;
 
         // Проверяем лимиты (если -1, то безлимит)
-        const chatsLimitExceeded = plan.maxChatsPerDay !== -1 && 
+        const chatsLimitExceeded =
+          plan.maxChatsPerDay !== -1 &&
           currentUsage.chatsToday >= plan.maxChatsPerDay;
-        
-        const messagesLimitExceeded = plan.maxMessagesPerChat !== -1 && 
+
+        const messagesLimitExceeded =
+          plan.maxMessagesPerChat !== -1 &&
           currentUsage.messagesThisMonth >= plan.maxMessagesPerChat;
 
         return !chatsLimitExceeded && !messagesLimitExceeded;
@@ -292,17 +309,19 @@ export const useSubscriptionStore = create<SubscriptionState & SubscriptionActio
 
       updatePaymentMethod: async (method: string) => {
         set({ isLoading: true });
-        
+
         try {
           // TODO: Реальный API вызов
           // await subscriptionApi.updatePaymentMethod(method);
-          
+
           set((state) => {
             if (state.subscription) {
-              state.subscription.paymentMethod = method;
+              state.subscription.paymentMethod = method as
+                | 'card'
+                | 'paypal'
+                | 'crypto';
             }
           });
-
         } catch (error) {
           console.error('Failed to update payment method:', error);
           throw error;
@@ -332,14 +351,27 @@ export const useSubscriptionStore = create<SubscriptionState & SubscriptionActio
         set((state) => {
           state.currentUsage.messagesThisMonth = 0;
         });
-      }
+      },
+
+      reset: () => {
+        set({
+          subscription: null,
+          plans: [],
+          paymentHistory: [],
+          isLoading: false,
+          currentUsage: {
+            chatsToday: 0,
+            messagesThisMonth: 0,
+          },
+        });
+      },
     })),
     {
       name: 'subscription-store',
       partialize: (state) => ({
         subscription: state.subscription,
-        currentUsage: state.currentUsage
-      })
+        currentUsage: state.currentUsage,
+      }),
     }
   )
 );

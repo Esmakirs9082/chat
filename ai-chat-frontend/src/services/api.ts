@@ -1,5 +1,10 @@
 import { ApiResponse } from '../types';
-import axios, { AxiosInstance, AxiosRequestConfig, AxiosResponse, AxiosError } from 'axios';
+import axios, {
+  AxiosInstance,
+  AxiosRequestConfig,
+  AxiosResponse,
+  AxiosError,
+} from 'axios';
 import { useAuthStore } from '../stores/authStore';
 
 // Типы для API ответов
@@ -11,7 +16,8 @@ interface ApiError {
 }
 
 // Базовая конфигурация API
-const BASE_URL = (import.meta as any).env?.VITE_API_URL || 'http://localhost:3000/api';
+const BASE_URL =
+  (import.meta as any).env?.VITE_API_URL || 'http://localhost:3000/api';
 
 // Генерация уникального ID для запроса
 const generateRequestId = (): string => {
@@ -33,7 +39,7 @@ apiClient.interceptors.request.use(
     // Добавляем timestamp и request ID для логирования
     const requestId = generateRequestId();
     const timestamp = new Date().toISOString();
-    
+
     if (config.headers) {
       config.headers['X-Request-ID'] = requestId;
       config.headers['X-Timestamp'] = timestamp;
@@ -50,7 +56,7 @@ apiClient.interceptors.request.use(
         try {
           const { state } = JSON.parse(authStorage);
           const accessToken = state?.tokens?.accessToken || state?.token;
-          
+
           if (accessToken && config.headers) {
             config.headers.Authorization = `Bearer ${accessToken}`;
           }
@@ -65,10 +71,13 @@ apiClient.interceptors.request.use(
       method: config.method?.toUpperCase(),
       url: config.url,
       timestamp,
-      headers: { ...config.headers, Authorization: config.headers.Authorization ? '[REDACTED]' : undefined },
+      headers: {
+        ...config.headers,
+        Authorization: config.headers.Authorization ? '[REDACTED]' : undefined,
+      },
       data: config.data,
     });
-    
+
     return config;
   },
   (error) => {
@@ -78,7 +87,10 @@ apiClient.interceptors.request.use(
 );
 
 // Функция для показа уведомлений (временная реализация)
-const showNotification = (message: string, type: 'success' | 'error' | 'warning' | 'info') => {
+const showNotification = (
+  message: string,
+  type: 'success' | 'error' | 'warning' | 'info'
+) => {
   console.log(`[Notification ${type.toUpperCase()}]`, message);
   // TODO: Интегрировать с настоящей системой уведомлений
 };
@@ -87,17 +99,23 @@ const showNotification = (message: string, type: 'success' | 'error' | 'warning'
 apiClient.interceptors.response.use(
   (response: AxiosResponse) => {
     const requestId = response.config.headers?.['X-Request-ID'];
-    
+
     // Логируем успешный ответ
     console.log(`[API Response ${requestId}]`, {
       status: response.status,
       statusText: response.statusText,
       data: response.data,
-      responseTime: Date.now() - parseInt(response.config.headers?.['X-Timestamp'] || '0', 10),
+      responseTime:
+        Date.now() -
+        parseInt(response.config.headers?.['X-Timestamp'] || '0', 10),
     });
 
     // Transform response data - извлекаем data если это обёрнутый ответ
-    if (response.data && typeof response.data === 'object' && 'data' in response.data) {
+    if (
+      response.data &&
+      typeof response.data === 'object' &&
+      'data' in response.data
+    ) {
       return {
         ...response,
         data: response.data.data,
@@ -133,34 +151,45 @@ apiClient.interceptors.response.use(
 
           try {
             const authState = useAuthStore.getState();
-            
-            if (authState.refreshToken && !error.config?.url?.includes('/auth/refresh')) {
+
+            if (
+              authState.refreshToken &&
+              !error.config?.url?.includes('/auth/refresh')
+            ) {
               // TODO: Реализовать refresh token через authStore
               // await authState.refreshAccessToken();
-              
+
               // Fallback к старой логике
               const authStorage = localStorage.getItem('auth-storage');
               if (authStorage) {
                 const { state } = JSON.parse(authStorage);
-                const refreshToken = state?.tokens?.refreshToken || state?.refreshToken;
-                
+                const refreshToken =
+                  state?.tokens?.refreshToken || state?.refreshToken;
+
                 if (refreshToken) {
-                  const response = await axios.post(`${BASE_URL}/auth/refresh`, {
-                    refreshToken,
-                  });
-                  
-                  const { accessToken, refreshToken: newRefreshToken } = response.data;
-                  
+                  const response = await axios.post(
+                    `${BASE_URL}/auth/refresh`,
+                    {
+                      refreshToken,
+                    }
+                  );
+
+                  const { accessToken, refreshToken: newRefreshToken } =
+                    response.data;
+
                   // Обновляем токены через localStorage (пока setTokens не реализован)
                   const updatedState = {
                     ...state,
                     tokens: { accessToken, refreshToken: newRefreshToken },
                   };
-                  localStorage.setItem('auth-storage', JSON.stringify({
-                    state: updatedState,
-                    version: 0,
-                  }));
-                  
+                  localStorage.setItem(
+                    'auth-storage',
+                    JSON.stringify({
+                      state: updatedState,
+                      version: 0,
+                    })
+                  );
+
                   // Повторяем оригинальный запрос с новым токеном
                   if (originalRequest.headers) {
                     originalRequest.headers.Authorization = `Bearer ${accessToken}`;
@@ -178,14 +207,20 @@ apiClient.interceptors.response.use(
             console.error('[API] Refresh token failed:', refreshError);
             const authState = useAuthStore.getState();
             authState.logout();
-            showNotification('Сессия истекла. Пожалуйста, войдите снова.', 'error');
+            showNotification(
+              'Сессия истекла. Пожалуйста, войдите снова.',
+              'error'
+            );
           }
         }
         break;
       }
 
       case 403:
-        showNotification('Недостаточно прав для выполнения этого действия', 'error');
+        showNotification(
+          'Недостаточно прав для выполнения этого действия',
+          'error'
+        );
         break;
 
       case 429:
@@ -201,7 +236,8 @@ apiClient.interceptors.response.use(
 
       default:
         if (statusCode && statusCode >= 400) {
-          const errorMessage = (error.response?.data as any)?.message || 'Произошла ошибка';
+          const errorMessage =
+            (error.response?.data as any)?.message || 'Произошла ошибка';
           showNotification(errorMessage, 'error');
         }
     }
@@ -284,10 +320,14 @@ export const del = async <T = any>(
 export const upload = async (
   url: string,
   file: File | Blob,
-  onProgress?: (progressEvent: { loaded: number; total: number; percentage: number }) => void
+  onProgress?: (progressEvent: {
+    loaded: number;
+    total: number;
+    percentage: number;
+  }) => void
 ): Promise<any> => {
   const formData = new FormData();
-  
+
   if (file instanceof File) {
     formData.append('file', file, file.name);
   } else {
@@ -300,7 +340,9 @@ export const upload = async (
     },
     onUploadProgress: (progressEvent) => {
       if (onProgress && progressEvent.total) {
-        const percentage = Math.round((progressEvent.loaded * 100) / progressEvent.total);
+        const percentage = Math.round(
+          (progressEvent.loaded * 100) / progressEvent.total
+        );
         onProgress({
           loaded: progressEvent.loaded,
           total: progressEvent.total,
@@ -320,10 +362,14 @@ export const upload = async (
 export const uploadMultiple = async (
   url: string,
   files: (File | Blob)[],
-  onProgress?: (progressEvent: { loaded: number; total: number; percentage: number }) => void
+  onProgress?: (progressEvent: {
+    loaded: number;
+    total: number;
+    percentage: number;
+  }) => void
 ): Promise<any> => {
   const formData = new FormData();
-  
+
   files.forEach((file, index) => {
     if (file instanceof File) {
       formData.append(`files[${index}]`, file, file.name);
@@ -338,7 +384,9 @@ export const uploadMultiple = async (
     },
     onUploadProgress: (progressEvent) => {
       if (onProgress && progressEvent.total) {
-        const percentage = Math.round((progressEvent.loaded * 100) / progressEvent.total);
+        const percentage = Math.round(
+          (progressEvent.loaded * 100) / progressEvent.total
+        );
         onProgress({
           loaded: progressEvent.loaded,
           total: progressEvent.total,
@@ -415,7 +463,7 @@ export async function apiRequest<T = any>(
 ): Promise<ApiResponse<T>> {
   try {
     const response = await apiClient(config);
-    
+
     return {
       success: true,
       data: response.data,
@@ -432,16 +480,16 @@ export async function apiRequest<T = any>(
 export const api = {
   get: <T = any>(url: string, config?: AxiosRequestConfig) =>
     apiRequest<T>({ method: 'GET', url, ...config }),
-    
+
   post: <T = any>(url: string, data?: any, config?: AxiosRequestConfig) =>
     apiRequest<T>({ method: 'POST', url, data, ...config }),
-    
+
   put: <T = any>(url: string, data?: any, config?: AxiosRequestConfig) =>
     apiRequest<T>({ method: 'PUT', url, data, ...config }),
-    
+
   patch: <T = any>(url: string, data?: any, config?: AxiosRequestConfig) =>
     apiRequest<T>({ method: 'PATCH', url, data, ...config }),
-    
+
   delete: <T = any>(url: string, config?: AxiosRequestConfig) =>
     apiRequest<T>({ method: 'DELETE', url, ...config }),
 };

@@ -1,5 +1,11 @@
 import { api } from './api';
-import { User, AuthTokens, LoginCredentials, RegisterData, ApiResponse } from '../types';
+import {
+  User,
+  AuthTokens,
+  LoginCredentials,
+  RegisterData,
+  ApiResponse,
+} from '../types';
 
 // Интерфейсы для API ответов
 interface LoginResponse {
@@ -29,12 +35,16 @@ interface ResetPasswordRequest {
 // API методы для авторизации
 export const authApi = {
   // Вход в систему
-  login: async (credentials: LoginCredentials): Promise<ApiResponse<LoginResponse>> => {
+  login: async (
+    credentials: LoginCredentials
+  ): Promise<ApiResponse<LoginResponse>> => {
     return api.post<LoginResponse>('/auth/login', credentials);
   },
 
   // Регистрация
-  register: async (data: RegisterData): Promise<ApiResponse<RegisterResponse>> => {
+  register: async (
+    data: RegisterData
+  ): Promise<ApiResponse<RegisterResponse>> => {
     return api.post<RegisterResponse>('/auth/register', data);
   },
 
@@ -44,18 +54,28 @@ export const authApi = {
   },
 
   // Обновление токена доступа
-  refreshToken: async (refreshToken: string): Promise<ApiResponse<RefreshTokenResponse>> => {
+  refreshToken: async (
+    refreshToken: string
+  ): Promise<ApiResponse<RefreshTokenResponse>> => {
     return api.post<RefreshTokenResponse>('/auth/refresh', { refreshToken });
   },
 
   // Восстановление пароля - отправка email
-  forgotPassword: async (email: string): Promise<ApiResponse<{ message: string }>> => {
+  forgotPassword: async (
+    email: string
+  ): Promise<ApiResponse<{ message: string }>> => {
     return api.post<{ message: string }>('/auth/forgot-password', { email });
   },
 
   // Сброс пароля по токену
-  resetPassword: async (token: string, password: string): Promise<ApiResponse<{ message: string }>> => {
-    return api.post<{ message: string }>('/auth/reset-password', { token, password });
+  resetPassword: async (
+    token: string,
+    password: string
+  ): Promise<ApiResponse<{ message: string }>> => {
+    return api.post<{ message: string }>('/auth/reset-password', {
+      token,
+      password,
+    });
   },
 
   // Получение информации о текущем пользователе
@@ -69,7 +89,10 @@ export const authApi = {
   },
 
   // Изменение пароля
-  changePassword: async (currentPassword: string, newPassword: string): Promise<ApiResponse<{ message: string }>> => {
+  changePassword: async (
+    currentPassword: string,
+    newPassword: string
+  ): Promise<ApiResponse<{ message: string }>> => {
     return api.post<{ message: string }>('/auth/change-password', {
       currentPassword,
       newPassword,
@@ -77,22 +100,30 @@ export const authApi = {
   },
 
   // Верификация email
-  verifyEmail: async (token: string): Promise<ApiResponse<{ message: string }>> => {
+  verifyEmail: async (
+    token: string
+  ): Promise<ApiResponse<{ message: string }>> => {
     return api.post<{ message: string }>('/auth/verify-email', { token });
   },
 
   // Повторная отправка письма верификации
-  resendVerificationEmail: async (): Promise<ApiResponse<{ message: string }>> => {
+  resendVerificationEmail: async (): Promise<
+    ApiResponse<{ message: string }>
+  > => {
     return api.post<{ message: string }>('/auth/resend-verification');
   },
 
   // Проверка доступности username
-  checkUsernameAvailability: async (username: string): Promise<ApiResponse<{ available: boolean }>> => {
+  checkUsernameAvailability: async (
+    username: string
+  ): Promise<ApiResponse<{ available: boolean }>> => {
     return api.get<{ available: boolean }>(`/auth/check-username/${username}`);
   },
 
   // Проверка доступности email
-  checkEmailAvailability: async (email: string): Promise<ApiResponse<{ available: boolean }>> => {
+  checkEmailAvailability: async (
+    email: string
+  ): Promise<ApiResponse<{ available: boolean }>> => {
     return api.get<{ available: boolean }>(`/auth/check-email/${email}`);
   },
 };

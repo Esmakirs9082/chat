@@ -1,6 +1,14 @@
 // Примеры использования API клиента
 
-import { get, post, put, del, upload, createCancelToken, isCancel } from '../services/api';
+import {
+  get,
+  post,
+  put,
+  del,
+  upload,
+  createCancelToken,
+  isCancel,
+} from '../services/api';
 import { Character } from '../types';
 import { Chat, Message } from '../types/chat';
 import { User } from '../types';
@@ -10,15 +18,23 @@ import { User } from '../types';
 export const authAPI = {
   // Логин
   login: (credentials: { email: string; password: string }) =>
-    post<{ user: User; token: string; refreshToken: string }>('/auth/login', credentials),
+    post<{ user: User; token: string; refreshToken: string }>(
+      '/auth/login',
+      credentials
+    ),
 
   // Регистрация
   register: (userData: { email: string; password: string; name: string }) =>
-    post<{ user: User; token: string; refreshToken: string }>('/auth/register', userData),
+    post<{ user: User; token: string; refreshToken: string }>(
+      '/auth/register',
+      userData
+    ),
 
   // Обновление токена
   refreshToken: (refreshToken: string) =>
-    post<{ accessToken: string; refreshToken: string }>('/auth/refresh', { refreshToken }),
+    post<{ accessToken: string; refreshToken: string }>('/auth/refresh', {
+      refreshToken,
+    }),
 
   // Логаут
   logout: () => post('/auth/logout'),
@@ -38,7 +54,11 @@ export const charactersAPI = {
     category?: string;
     search?: string;
     nsfw?: boolean;
-  }) => get<{ characters: Character[]; total: number; hasMore: boolean }>('/characters', { params }),
+  }) =>
+    get<{ characters: Character[]; total: number; hasMore: boolean }>(
+      '/characters',
+      { params }
+    ),
 
   // Получить персонажа по ID
   getCharacter: (id: string) => get<Character>(`/characters/${id}`),
@@ -55,7 +75,11 @@ export const charactersAPI = {
   deleteCharacter: (id: string) => del(`/characters/${id}`),
 
   // Загрузить аватар персонажа
-  uploadAvatar: (characterId: string, file: File, onProgress?: (progress: number) => void) =>
+  uploadAvatar: (
+    characterId: string,
+    file: File,
+    onProgress?: (progress: number) => void
+  ) =>
     upload(`/characters/${characterId}/avatar`, file, (event) => {
       if (onProgress) {
         onProgress(event.percentage);
@@ -87,7 +111,10 @@ export const chatAPI = {
 
   // Получить сообщения чата
   getMessages: (chatId: string, params?: { before?: string; limit?: number }) =>
-    get<{ messages: Message[]; hasMore: boolean }>(`/chats/${chatId}/messages`, { params }),
+    get<{ messages: Message[]; hasMore: boolean }>(
+      `/chats/${chatId}/messages`,
+      { params }
+    ),
 
   // Удалить чат
   deleteChat: (id: string) => del(`/chats/${id}`),
@@ -170,12 +197,16 @@ export class CharacterService {
 // === Пример использования с прогрессом загрузки ===
 
 export const uploadCharacterAvatar = async (
-  characterId: string, 
+  characterId: string,
   file: File,
   onProgress: (progress: number) => void
 ) => {
   try {
-    const result = await charactersAPI.uploadAvatar(characterId, file, onProgress);
+    const result = await charactersAPI.uploadAvatar(
+      characterId,
+      file,
+      onProgress
+    );
     console.log('Upload completed:', result);
     return result;
   } catch (error) {
@@ -189,13 +220,15 @@ export const uploadCharacterAvatar = async (
 export const batchOperations = {
   // Массовое удаление чатов
   deleteMultipleChats: async (chatIds: string[]) => {
-    const deletePromises = chatIds.map(id => chatAPI.deleteChat(id));
+    const deletePromises = chatIds.map((id) => chatAPI.deleteChat(id));
     return Promise.allSettled(deletePromises);
   },
 
   // Массовое добавление в избранное
   addMultipleToFavorites: async (characterIds: string[]) => {
-    const favoritePromises = characterIds.map(id => charactersAPI.toggleFavorite(id));
+    const favoritePromises = characterIds.map((id) =>
+      charactersAPI.toggleFavorite(id)
+    );
     return Promise.allSettled(favoritePromises);
   },
 };

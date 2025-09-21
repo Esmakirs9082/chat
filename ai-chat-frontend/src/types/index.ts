@@ -111,3 +111,13 @@ export interface CharacterCreateForm {
   isNsfw: boolean;
   tags: string[];
 }
+
+// Подписки и платежи
+export interface Subscription {
+  type: 'free' | 'basic' | 'premium';
+  isActive: boolean;
+  startDate: Date;
+  expiresAt?: Date;
+  autoRenew: boolean;
+  paymentMethod?: 'card' | 'paypal' | 'crypto';
+}

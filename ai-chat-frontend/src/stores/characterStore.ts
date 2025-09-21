@@ -53,6 +53,7 @@ interface CharacterActions {
   setSearchQuery: (query: string) => void;
   setSelectedTags: (tags: string[]) => void;
   clearError: () => void;
+  reset: () => void;
   isFavorite: (characterId: string) => boolean;
 }
 
@@ -62,7 +63,9 @@ interface CharacterComputed {
   favoriteCharacters: Character[];
 }
 
-export const useCharacterStore = create<CharacterState & CharacterActions & CharacterComputed>()(
+export const useCharacterStore = create<
+  CharacterState & CharacterActions & CharacterComputed
+>()(
   persist(
     immer((set, get) => ({
       // State
@@ -74,18 +77,24 @@ export const useCharacterStore = create<CharacterState & CharacterActions & Char
         search: '',
         tags: [],
         nsfwEnabled: false,
-        sortBy: 'name'
+        sortBy: 'name',
       },
       pagination: {
         page: 1,
         limit: 20,
-        total: 0
+        total: 0,
       },
       // Для обратной совместимости
       error: null,
-      get showNsfw() { return get().filters.nsfwEnabled; },
-      get searchQuery() { return get().filters.search; },
-      get selectedTags() { return get().filters.tags; },
+      get showNsfw() {
+        return get().filters.nsfwEnabled;
+      },
+      get searchQuery() {
+        return get().filters.search;
+      },
+      get selectedTags() {
+        return get().filters.tags;
+      },
 
       // Computed properties
       get filteredCharacters() {
@@ -95,22 +104,23 @@ export const useCharacterStore = create<CharacterState & CharacterActions & Char
         // Поиск по имени и описанию
         if (filters.search) {
           const searchLower = filters.search.toLowerCase();
-          filtered = filtered.filter(char => 
-            char.name.toLowerCase().includes(searchLower) ||
-            char.description.toLowerCase().includes(searchLower)
+          filtered = filtered.filter(
+            (char) =>
+              char.name.toLowerCase().includes(searchLower) ||
+              char.description.toLowerCase().includes(searchLower)
           );
         }
 
         // Фильтр по тегам
         if (filters.tags.length > 0) {
-          filtered = filtered.filter(char =>
-            filters.tags.some(tag => char.tags.includes(tag))
+          filtered = filtered.filter((char) =>
+            filters.tags.some((tag) => char.tags.includes(tag))
           );
         }
 
         // Фильтр NSFW
         if (!filters.nsfwEnabled) {
-          filtered = filtered.filter(char => !char.isNsfw);
+          filtered = filtered.filter((char) => !char.isNsfw);
         }
 
         // Сортировка
@@ -119,7 +129,11 @@ export const useCharacterStore = create<CharacterState & CharacterActions & Char
             filtered.sort((a, b) => a.name.localeCompare(b.name));
             break;
           case 'created':
-            filtered.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+            filtered.sort(
+              (a, b) =>
+                new Date(b.createdAt).getTime() -
+                new Date(a.createdAt).getTime()
+            );
             break;
           case 'popular':
             // TODO: Добавить поле popularity в Character
@@ -133,13 +147,13 @@ export const useCharacterStore = create<CharacterState & CharacterActions & Char
 
       get favoriteCharacters() {
         const { characters, favorites } = get();
-        return characters.filter(char => favorites.includes(char.id));
+        return characters.filter((char) => favorites.includes(char.id));
       },
 
       // Actions
       loadCharacters: async (filterUpdates?: Partial<CharacterFilters>) => {
         set({ isLoading: true });
-        
+
         try {
           // Обновляем фильтры если переданы
           if (filterUpdates) {
@@ -154,7 +168,7 @@ export const useCharacterStore = create<CharacterState & CharacterActions & Char
           //   page: get().pagination.page,
           //   limit: get().pagination.limit
           // });
-          
+
           // Мок данные для демонстрации
           const mockCharacters: Character[] = [
             {
@@ -164,7 +178,7 @@ export const useCharacterStore = create<CharacterState & CharacterActions & Char
               avatar: undefined,
               personality: [
                 { trait: 'дружелюбный', value: 5 },
-                { trait: 'умный', value: 4 }
+                { trait: 'умный', value: 4 },
               ],
               isNsfw: false,
               tags: ['помощник', 'дружелюбный', 'popular'],
@@ -172,7 +186,7 @@ export const useCharacterStore = create<CharacterState & CharacterActions & Char
               isPublic: true,
               createdBy: 'system',
               messageCount: 156,
-              favoriteCount: 89
+              favoriteCount: 89,
             },
             {
               id: 'char-2',
@@ -181,7 +195,7 @@ export const useCharacterStore = create<CharacterState & CharacterActions & Char
               avatar: undefined,
               personality: [
                 { trait: 'творческий', value: 5 },
-                { trait: 'вдохновляющий', value: 4 }
+                { trait: 'вдохновляющий', value: 4 },
               ],
               isNsfw: false,
               tags: ['писатель', 'творческий', 'featured'],
@@ -189,15 +203,14 @@ export const useCharacterStore = create<CharacterState & CharacterActions & Char
               isPublic: true,
               createdBy: 'system',
               messageCount: 234,
-              favoriteCount: 67
-            }
+              favoriteCount: 67,
+            },
           ];
 
           set((state) => {
             state.characters = mockCharacters;
             state.pagination.total = mockCharacters.length;
           });
-
         } catch (error) {
           console.error('Failed to load characters:', error);
         } finally {
@@ -207,20 +220,19 @@ export const useCharacterStore = create<CharacterState & CharacterActions & Char
 
       loadCharacter: async (id: string) => {
         set({ isLoading: true });
-        
+
         try {
           // TODO: Реальный API вызов
           // const character = await characterApi.getCharacter(id);
-          
+
           // Мок: ищем в локальном списке
-          const character = get().characters.find(c => c.id === id);
+          const character = get().characters.find((c) => c.id === id);
           if (!character) {
             throw new Error('Character not found');
           }
 
           set({ selectedCharacter: character });
           return character;
-
         } catch (error) {
           console.error('Failed to load character:', error);
           throw error;
@@ -231,11 +243,11 @@ export const useCharacterStore = create<CharacterState & CharacterActions & Char
 
       createCharacter: async (form: CharacterCreateForm) => {
         set({ isLoading: true });
-        
+
         try {
           // TODO: Реальный API вызов
           // const character = await characterApi.createCharacter(form);
-          
+
           // Мок создания персонажа
           const newCharacter: Character = {
             id: `char-${Date.now()}`,
@@ -244,8 +256,11 @@ export const useCharacterStore = create<CharacterState & CharacterActions & Char
             avatar: undefined, // TODO: обработка загрузки файла
             personality: [
               { trait: 'открытость', value: form.personality.openness },
-              { trait: 'добросовестность', value: form.personality.conscientiousness },
-              { trait: 'экстраверсия', value: form.personality.extraversion }
+              {
+                trait: 'добросовестность',
+                value: form.personality.conscientiousness,
+              },
+              { trait: 'экстраверсия', value: form.personality.extraversion },
             ],
             isNsfw: form.isNsfw,
             tags: form.tags,
@@ -253,7 +268,7 @@ export const useCharacterStore = create<CharacterState & CharacterActions & Char
             isPublic: form.isPublic,
             createdBy: 'current-user', // TODO: получать из auth store
             messageCount: 0,
-            favoriteCount: 0
+            favoriteCount: 0,
           };
 
           set((state) => {
@@ -262,7 +277,6 @@ export const useCharacterStore = create<CharacterState & CharacterActions & Char
           });
 
           return newCharacter;
-
         } catch (error) {
           console.error('Failed to create character:', error);
           throw error;
@@ -273,23 +287,27 @@ export const useCharacterStore = create<CharacterState & CharacterActions & Char
 
       updateCharacter: async (id: string, updates: Partial<Character>) => {
         set({ isLoading: true });
-        
+
         try {
           // TODO: Реальный API вызов
           // await characterApi.updateCharacter(id, updates);
-          
+
           set((state) => {
-            const index = state.characters.findIndex((c: Character) => c.id === id);
+            const index = state.characters.findIndex(
+              (c: Character) => c.id === id
+            );
             if (index !== -1) {
               Object.assign(state.characters[index], updates);
-              
+
               // Обновляем выбранного персонажа если это он
-              if (state.selectedCharacter && state.selectedCharacter.id === id) {
+              if (
+                state.selectedCharacter &&
+                state.selectedCharacter.id === id
+              ) {
                 Object.assign(state.selectedCharacter, updates);
               }
             }
           });
-
         } catch (error) {
           console.error('Failed to update character:', error);
           throw error;
@@ -300,22 +318,25 @@ export const useCharacterStore = create<CharacterState & CharacterActions & Char
 
       deleteCharacter: async (id: string) => {
         set({ isLoading: true });
-        
+
         try {
           // TODO: Реальный API вызов
           // await characterApi.deleteCharacter(id);
-          
+
           set((state) => {
-            state.characters = state.characters.filter((c: Character) => c.id !== id);
-            state.favorites = state.favorites.filter((fav: string) => fav !== id);
+            state.characters = state.characters.filter(
+              (c: Character) => c.id !== id
+            );
+            state.favorites = state.favorites.filter(
+              (fav: string) => fav !== id
+            );
             state.pagination.total -= 1;
-            
+
             // Сброс выбранного персонажа если это он
             if (state.selectedCharacter && state.selectedCharacter.id === id) {
               state.selectedCharacter = null;
             }
           });
-
         } catch (error) {
           console.error('Failed to delete character:', error);
           throw error;
@@ -368,7 +389,9 @@ export const useCharacterStore = create<CharacterState & CharacterActions & Char
 
       removeFromFavorites: (characterId: string) => {
         set((state) => {
-          state.favorites = state.favorites.filter((fav: string) => fav !== characterId);
+          state.favorites = state.favorites.filter(
+            (fav: string) => fav !== characterId
+          );
         });
       },
 
@@ -396,17 +419,38 @@ export const useCharacterStore = create<CharacterState & CharacterActions & Char
         set({ error: null });
       },
 
+      reset: () => {
+        set({
+          characters: [],
+          selectedCharacter: null,
+          favorites: [],
+          isLoading: false,
+          filters: {
+            search: '',
+            tags: [],
+            nsfwEnabled: false,
+            sortBy: 'popularity',
+          },
+          pagination: {
+            page: 1,
+            limit: 20,
+            total: 0,
+          },
+          error: null,
+        });
+      },
+
       isFavorite: (characterId: string) => {
         return get().favorites.includes(characterId);
-      }
+      },
     })),
     {
       name: 'character-store',
       partialize: (state) => ({
         favorites: state.favorites,
         filters: state.filters,
-        pagination: state.pagination
-      })
+        pagination: state.pagination,
+      }),
     }
   )
 );

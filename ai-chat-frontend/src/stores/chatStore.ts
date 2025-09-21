@@ -74,7 +74,7 @@ export const useChatStore = create<ChatState & ChatActions>()(
         sender: 'user',
         content,
         timestamp: new Date(),
-        type: 'text'
+        type: 'text',
       };
 
       set((state) => {
@@ -114,15 +114,15 @@ export const useChatStore = create<ChatState & ChatActions>()(
           isArchived: false,
           settings: {
             autoReply: true,
-            typingEnabled: true
-          }
+            typingEnabled: true,
+          },
         };
-        
+
         set((state) => {
           state.chats.push(newChat);
           state.activeChat = newChat;
         });
-        
+
         return newChat;
       } catch (error) {
         console.error('Failed to create chat:', error);
@@ -136,7 +136,7 @@ export const useChatStore = create<ChatState & ChatActions>()(
       try {
         // TODO: API call to delete chat
         // await chatApi.deleteChat(chatId);
-        
+
         set((state) => {
           state.chats = state.chats.filter((chat: Chat) => chat.id !== chatId);
           if (state.activeChat && state.activeChat.id === chatId) {

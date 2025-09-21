@@ -41,6 +41,7 @@ interface SettingsActions {
   loadSettings: () => Promise<void>;
   saveSettings: () => Promise<void>;
   resetToDefaults: () => void;
+  reset: () => void;
 }
 
 // Функция применения темы к DOM
@@ -54,7 +55,9 @@ const applyTheme = (theme: 'dark' | 'light') => {
 // Функция получения системной темы
 const getSystemTheme = (): 'dark' | 'light' => {
   if (typeof window !== 'undefined' && window.matchMedia) {
-    return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+    return window.matchMedia('(prefers-color-scheme: dark)').matches
+      ? 'dark'
+      : 'light';
   }
   return 'light';
 };
@@ -66,17 +69,17 @@ const defaultSettings: Omit<SettingsState, 'isLoading' | 'lastSyncedAt'> = {
   notifications: {
     email: true,
     push: true,
-    marketing: false
+    marketing: false,
   },
   chatSettings: {
     autoReply: false,
     typingIndicators: true,
-    soundEnabled: true
+    soundEnabled: true,
   },
   privacy: {
     profilePublic: true,
-    charactersPublic: true
-  }
+    charactersPublic: true,
+  },
 };
 
 export const useSettingsStore = create<SettingsState & SettingsActions>()(
@@ -91,7 +94,7 @@ export const useSettingsStore = create<SettingsState & SettingsActions>()(
       setTheme: (theme: 'dark' | 'light') => {
         set({ theme });
         applyTheme(theme);
-        
+
         // Асинхронно сохраняем на сервер для авторизованных пользователей
         setTimeout(() => {
           get().saveSettings().catch(console.error);
@@ -102,7 +105,7 @@ export const useSettingsStore = create<SettingsState & SettingsActions>()(
         set((state) => {
           state.nsfwEnabled = !state.nsfwEnabled;
         });
-        
+
         // Асинхронно сохраняем на сервер
         setTimeout(() => {
           get().saveSettings().catch(console.error);
@@ -113,7 +116,7 @@ export const useSettingsStore = create<SettingsState & SettingsActions>()(
         set((state) => {
           Object.assign(state.notifications, settings);
         });
-        
+
         // Асинхронно сохраняем на сервер
         setTimeout(() => {
           get().saveSettings().catch(console.error);
@@ -124,7 +127,7 @@ export const useSettingsStore = create<SettingsState & SettingsActions>()(
         set((state) => {
           Object.assign(state.chatSettings, settings);
         });
-        
+
         // Асинхронно сохраняем на сервер
         setTimeout(() => {
           get().saveSettings().catch(console.error);
@@ -135,7 +138,7 @@ export const useSettingsStore = create<SettingsState & SettingsActions>()(
         set((state) => {
           Object.assign(state.privacy, settings);
         });
-        
+
         // Асинхронно сохраняем на сервер
         setTimeout(() => {
           get().saveSettings().catch(console.error);
@@ -144,7 +147,7 @@ export const useSettingsStore = create<SettingsState & SettingsActions>()(
 
       loadSettings: async () => {
         set({ isLoading: true });
-        
+
         try {
           // TODO: Проверить, авторизован ли пользователь
           // const authStore = useAuthStore.getState();
@@ -155,7 +158,7 @@ export const useSettingsStore = create<SettingsState & SettingsActions>()(
 
           // TODO: Реальный API вызов для загрузки настроек с сервера
           // const serverSettings = await settingsApi.getSettings();
-          
+
           // Мок данные для демонстрации
           // Если есть настройки на сервере, они перезаписывают локальные
           const serverSettings: Partial<SettingsState> = {
@@ -189,7 +192,6 @@ export const useSettingsStore = create<SettingsState & SettingsActions>()(
               applyTheme(serverSettings.theme);
             }
           }
-
         } catch (error) {
           console.error('Failed to load settings from server:', error);
           // При ошибке продолжаем использовать локальные настройки
@@ -207,7 +209,7 @@ export const useSettingsStore = create<SettingsState & SettingsActions>()(
           // }
 
           const currentSettings = get();
-          
+
           // TODO: Реальный API вызов для сохранения настроек на сервер
           // await settingsApi.saveSettings({
           //   theme: currentSettings.theme,
@@ -218,7 +220,6 @@ export const useSettingsStore = create<SettingsState & SettingsActions>()(
           // });
 
           set({ lastSyncedAt: new Date() });
-
         } catch (error) {
           console.error('Failed to save settings to server:', error);
           // При ошибке продолжаем использовать локальные настройки
@@ -230,10 +231,10 @@ export const useSettingsStore = create<SettingsState & SettingsActions>()(
           Object.assign(state, defaultSettings);
           state.lastSyncedAt = undefined;
         });
-        
+
         // Применяем дефолтную тему
         applyTheme(defaultSettings.theme);
-        
+
         // Асинхронно сохраняем на сервер
         setTimeout(() => {
           get().saveSettings().catch(console.error);
@@ -246,12 +247,12 @@ export const useSettingsStore = create<SettingsState & SettingsActions>()(
           Object.assign(state, settings);
           state.lastSyncedAt = new Date();
         });
-        
+
         // Применяем тему если она была импортирована
         if (settings.theme) {
           applyTheme(settings.theme);
         }
-        
+
         // Сохраняем на сервер
         setTimeout(() => {
           get().saveSettings().catch(console.error);
@@ -266,13 +267,21 @@ export const useSettingsStore = create<SettingsState & SettingsActions>()(
           notifications: state.notifications,
           chatSettings: state.chatSettings,
           privacy: state.privacy,
-          exportedAt: new Date()
+          exportedAt: new Date(),
         };
-      }
+      },
+
+      reset: () => {
+        set({
+          ...defaultSettings,
+          isLoading: false,
+          lastSyncedAt: undefined,
+        });
+      },
     })),
     {
       name: 'settings-store',
-      
+
       // Настройка сериализации - исключаем временные состояния
       partialize: (state) => ({
         theme: state.theme,
@@ -280,8 +289,8 @@ export const useSettingsStore = create<SettingsState & SettingsActions>()(
         notifications: state.notifications,
         chatSettings: state.chatSettings,
         privacy: state.privacy,
-        lastSyncedAt: state.lastSyncedAt
-      })
+        lastSyncedAt: state.lastSyncedAt,
+      }),
     }
   )
 );
@@ -289,10 +298,10 @@ export const useSettingsStore = create<SettingsState & SettingsActions>()(
 // Инициализация store после создания
 setTimeout(() => {
   const settings = useSettingsStore.getState();
-  
+
   // Применяем текущую тему
   applyTheme(settings.theme);
-  
+
   // Загружаем настройки с сервера (если пользователь авторизован)
   settings.loadSettings().catch(console.error);
 }, 0);
@@ -301,10 +310,10 @@ setTimeout(() => {
 if (typeof window !== 'undefined') {
   // Подписываемся на изменения системной темы
   const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
-  
+
   mediaQuery.addEventListener('change', (e) => {
     const settings = useSettingsStore.getState();
-    
+
     // Обновляем тему только если она следует системной
     // (можно добавить отдельную настройку "follow system theme")
     if (!localStorage.getItem('settings-store')) {

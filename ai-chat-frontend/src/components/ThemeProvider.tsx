@@ -1,10 +1,15 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
 
-const ThemeContext = createContext<{ theme: 'light' | 'dark'; setTheme: (t: 'light' | 'dark') => void }>({ theme: 'light', setTheme: () => {} });
+const ThemeContext = createContext<{
+  theme: 'light' | 'dark';
+  setTheme: (t: 'light' | 'dark') => void;
+}>({ theme: 'light', setTheme: () => {} });
 
 export const useTheme = () => useContext(ThemeContext);
 
-export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({
+  children,
+}) => {
   const [theme, setTheme] = useState<'light' | 'dark'>(
     (localStorage.getItem('theme') as 'light' | 'dark') || 'light'
   );

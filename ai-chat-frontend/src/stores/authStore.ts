@@ -21,6 +21,7 @@ interface AuthActions {
   refreshAuth: () => Promise<void>;
   updateUser: (user: Partial<User>) => void;
   checkAuth: () => void;
+  reset: () => void;
 }
 
 export const useAuthStore = create<AuthState & AuthActions>()(
@@ -29,7 +30,7 @@ export const useAuthStore = create<AuthState & AuthActions>()(
     token: localStorage.getItem('token'),
     refreshToken: localStorage.getItem('refreshToken'),
     isLoading: false,
-    
+
     // Computed properties
     get isAuthenticated() {
       return !!get().token;
@@ -75,7 +76,7 @@ export const useAuthStore = create<AuthState & AuthActions>()(
     refreshAuth: async () => {
       const refreshToken = get().refreshToken;
       if (!refreshToken) return;
-      
+
       try {
         // TODO: Реальный API вызов
         // const response = await authApi.refresh(refreshToken);
@@ -97,7 +98,7 @@ export const useAuthStore = create<AuthState & AuthActions>()(
       const token = localStorage.getItem('token');
       const refreshToken = localStorage.getItem('refreshToken');
       set({ token, refreshToken });
-      
+
       // TODO: Проверить валидность токена
       // if (token) {
       //   authApi.verifyToken(token).then(user => {
@@ -106,6 +107,17 @@ export const useAuthStore = create<AuthState & AuthActions>()(
       //     get().logout();
       //   });
       // }
+    },
+    reset: () => {
+      set({
+        user: null,
+        token: null,
+        refreshToken: null,
+        isLoading: false,
+        error: null,
+      });
+      localStorage.removeItem('token');
+      localStorage.removeItem('refreshToken');
     },
   }))
 );

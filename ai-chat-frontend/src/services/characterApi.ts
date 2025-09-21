@@ -51,15 +51,19 @@ export const getCharacters = async (
   const params = {
     page,
     limit,
-    ...filters
+    ...filters,
   };
 
   // Преобразуем массивы в строки для URL параметров
   if (params.tags) {
-    (params as any).tags = Array.isArray(params.tags) ? params.tags.join(',') : params.tags;
+    (params as any).tags = Array.isArray(params.tags)
+      ? params.tags.join(',')
+      : params.tags;
   }
   if (params.personality) {
-    (params as any).personality = Array.isArray(params.personality) ? params.personality.join(',') : params.personality;
+    (params as any).personality = Array.isArray(params.personality)
+      ? params.personality.join(',')
+      : params.personality;
   }
 
   return await get<PaginatedResponse<Character>>('/characters', { params });
@@ -111,7 +115,9 @@ export const toggleFavorite = async (characterId: string): Promise<void> => {
  * Получить список избранных персонажей
  */
 export const getFavorites = async (): Promise<Character[]> => {
-  const response = await get<{ characters: Character[] }>('/characters/favorites');
+  const response = await get<{ characters: Character[] }>(
+    '/characters/favorites'
+  );
   return response.characters;
 };
 
@@ -139,7 +145,7 @@ export const reportCharacter = async (
   const reportData: CharacterReport = {
     characterId,
     reason,
-    description
+    description,
   };
   await post(`/characters/${characterId}/report`, reportData);
 };
@@ -151,16 +157,21 @@ export const getCharacterReviews = async (
   characterId: string,
   page: number = 1,
   limit: number = 10
-): Promise<PaginatedResponse<{
-  id: string;
-  userId: string;
-  userName: string;
-  rating: number;
-  comment?: string;
-  createdAt: string;
-}>> => {
+): Promise<
+  PaginatedResponse<{
+    id: string;
+    userId: string;
+    userName: string;
+    rating: number;
+    comment?: string;
+    createdAt: string;
+  }>
+> => {
   const params = { page, limit };
-  return await get<PaginatedResponse<any>>(`/characters/${characterId}/reviews`, { params });
+  return await get<PaginatedResponse<any>>(
+    `/characters/${characterId}/reviews`,
+    { params }
+  );
 };
 
 // === CHARACTER ASSETS ===
@@ -203,14 +214,18 @@ export const uploadCharacterImages = async (
 /**
  * Получить статистику персонажа
  */
-export const getCharacterStats = async (characterId: string): Promise<CharacterStats> => {
+export const getCharacterStats = async (
+  characterId: string
+): Promise<CharacterStats> => {
   return await get<CharacterStats>(`/characters/${characterId}/stats`);
 };
 
 /**
  * Удалить аватар персонажа
  */
-export const deleteCharacterAvatar = async (characterId: string): Promise<void> => {
+export const deleteCharacterAvatar = async (
+  characterId: string
+): Promise<void> => {
   await del(`/characters/${characterId}/avatar`);
 };
 
@@ -241,18 +256,25 @@ export const searchCharacters = async (
     sortBy,
     page,
     limit,
-    ...filters
+    ...filters,
   };
 
   // Преобразуем массивы в строки для URL параметров
   if (params.tags) {
-    (params as any).tags = Array.isArray(params.tags) ? params.tags.join(',') : params.tags;
+    (params as any).tags = Array.isArray(params.tags)
+      ? params.tags.join(',')
+      : params.tags;
   }
   if (params.personality) {
-    (params as any).personality = Array.isArray(params.personality) ? params.personality.join(',') : params.personality;
+    (params as any).personality = Array.isArray(params.personality)
+      ? params.personality.join(',')
+      : params.personality;
   }
 
-  const response = await get<{ characters: Character[] }>('/characters/search', { params });
+  const response = await get<{ characters: Character[] }>(
+    '/characters/search',
+    { params }
+  );
   return response.characters;
 };
 
@@ -264,7 +286,10 @@ export const getFeaturedCharacters = async (
   category?: string
 ): Promise<Character[]> => {
   const params = { limit, category };
-  const response = await get<{ characters: Character[] }>('/characters/featured', { params });
+  const response = await get<{ characters: Character[] }>(
+    '/characters/featured',
+    { params }
+  );
   return response.characters;
 };
 
@@ -276,7 +301,10 @@ export const getTrendingCharacters = async (
   limit: number = 10
 ): Promise<Character[]> => {
   const params = { timeframe, limit };
-  const response = await get<{ characters: Character[] }>('/characters/trending', { params });
+  const response = await get<{ characters: Character[] }>(
+    '/characters/trending',
+    { params }
+  );
   return response.characters;
 };
 
@@ -289,7 +317,7 @@ export const getSimilarCharacters = async (
 ): Promise<Character[]> => {
   const params = { limit };
   const response = await get<{ characters: Character[] }>(
-    `/characters/${characterId}/similar`, 
+    `/characters/${characterId}/similar`,
     { params }
   );
   return response.characters;
@@ -304,7 +332,10 @@ export const getCharactersByCategory = async (
   limit: number = 20
 ): Promise<PaginatedResponse<Character>> => {
   const params = { page, limit };
-  return await get<PaginatedResponse<Character>>(`/characters/category/${category}`, { params });
+  return await get<PaginatedResponse<Character>>(
+    `/characters/category/${category}`,
+    { params }
+  );
 };
 
 /**
@@ -316,7 +347,10 @@ export const getCharactersByCreator = async (
   limit: number = 20
 ): Promise<PaginatedResponse<Character>> => {
   const params = { page, limit };
-  return await get<PaginatedResponse<Character>>(`/characters/creator/${creatorId}`, { params });
+  return await get<PaginatedResponse<Character>>(
+    `/characters/creator/${creatorId}`,
+    { params }
+  );
 };
 
 // === ADVANCED FEATURES ===
@@ -329,19 +363,23 @@ export const getCharacterTags = async (
   limit: number = 10
 ): Promise<string[]> => {
   const params = { q: query, limit };
-  const response = await get<{ tags: string[] }>('/characters/tags', { params });
+  const response = await get<{ tags: string[] }>('/characters/tags', {
+    params,
+  });
   return response.tags;
 };
 
 /**
  * Получить категории персонажей
  */
-export const getCharacterCategories = async (): Promise<{
-  id: string;
-  name: string;
-  description: string;
-  count: number;
-}[]> => {
+export const getCharacterCategories = async (): Promise<
+  {
+    id: string;
+    name: string;
+    description: string;
+    count: number;
+  }[]
+> => {
   const response = await get<{ categories: any[] }>('/characters/categories');
   return response.categories;
 };
@@ -365,7 +403,7 @@ export const exportCharacter = async (
   format: 'json' | 'tavern' | 'characterai' = 'json'
 ): Promise<{ downloadUrl: string }> => {
   return await post<{ downloadUrl: string }>(
-    `/characters/${characterId}/export`, 
+    `/characters/${characterId}/export`,
     { format }
   );
 };
@@ -400,7 +438,9 @@ export const batchCharacterOperations = {
   /**
    * Удалить несколько персонажей из избранного
    */
-  removeMultipleFromFavorites: async (characterIds: string[]): Promise<void> => {
+  removeMultipleFromFavorites: async (
+    characterIds: string[]
+  ): Promise<void> => {
     await del('/characters/batch/favorite', { data: { characterIds } });
   },
 
@@ -427,9 +467,11 @@ export const batchCharacterOperations = {
 /**
  * Создать отменяемый запрос для поиска персонажей
  */
-export const getCancellableCharacterSearch = (searchParams: CharacterSearchParams) => {
+export const getCancellableCharacterSearch = (
+  searchParams: CharacterSearchParams
+) => {
   const cancelTokenSource = createCancelToken();
-  
+
   const promise = searchCharacters(
     searchParams.query,
     searchParams.filters,
@@ -437,7 +479,7 @@ export const getCancellableCharacterSearch = (searchParams: CharacterSearchParam
     searchParams.page,
     searchParams.limit
   );
-  
+
   return {
     promise,
     cancel: () => cancelTokenSource.cancel('Search cancelled'),
@@ -452,15 +494,12 @@ export const getCancellableCharacters = (
   page: number = 1
 ) => {
   const cancelTokenSource = createCancelToken();
-  
-  const promise = get<PaginatedResponse<Character>>(
-    '/characters',
-    { 
-      params: { ...filters, page },
-      cancelToken: cancelTokenSource.token 
-    }
-  );
-  
+
+  const promise = get<PaginatedResponse<Character>>('/characters', {
+    params: { ...filters, page },
+    cancelToken: cancelTokenSource.token,
+  });
+
   return {
     promise,
     cancel: () => cancelTokenSource.cancel('Request cancelled'),
@@ -479,7 +518,10 @@ export class CharacterLoader {
   /**
    * Загрузить персонажа с кэшированием
    */
-  async loadCharacter(characterId: string, forceRefresh: boolean = false): Promise<Character> {
+  async loadCharacter(
+    characterId: string,
+    forceRefresh: boolean = false
+  ): Promise<Character> {
     // Возвращаем из кэша если есть и не требуется обновление
     if (!forceRefresh && this.cache.has(characterId)) {
       return this.cache.get(characterId)!;
@@ -492,12 +534,12 @@ export class CharacterLoader {
 
     // Создаем новый Promise для загрузки
     const loadingPromise = getCharacter(characterId)
-      .then(character => {
+      .then((character) => {
         this.cache.set(characterId, character);
         this.loadingPromises.delete(characterId);
         return character;
       })
-      .catch(error => {
+      .catch((error) => {
         this.loadingPromises.delete(characterId);
         throw error;
       });
@@ -511,9 +553,9 @@ export class CharacterLoader {
    */
   async preloadCharacters(characterIds: string[]): Promise<void> {
     const promises = characterIds
-      .filter(id => !this.cache.has(id))
-      .map(id => this.loadCharacter(id));
-    
+      .filter((id) => !this.cache.has(id))
+      .map((id) => this.loadCharacter(id));
+
     await Promise.allSettled(promises);
   }
 
@@ -543,21 +585,21 @@ export default {
   createCharacter,
   updateCharacter,
   deleteCharacter,
-  
+
   // Interactions
   toggleFavorite,
   getFavorites,
   rateCharacter,
   reportCharacter,
   getCharacterReviews,
-  
+
   // Assets
   uploadCharacterAvatar,
   uploadCharacterImages,
   getCharacterStats,
   deleteCharacterAvatar,
   deleteCharacterImage,
-  
+
   // Search & Discovery
   searchCharacters,
   getFeaturedCharacters,
@@ -565,17 +607,17 @@ export default {
   getSimilarCharacters,
   getCharactersByCategory,
   getCharactersByCreator,
-  
+
   // Advanced features
   getCharacterTags,
   getCharacterCategories,
   cloneCharacter,
   exportCharacter,
   importCharacter,
-  
+
   // Batch operations
   batch: batchCharacterOperations,
-  
+
   // Utilities
   characterLoader,
   getCancellableCharacterSearch,
@@ -583,9 +625,9 @@ export default {
 };
 
 // Экспорт типов
-export type { 
-  CharacterFilters, 
-  CharacterSearchParams, 
-  CharacterStats, 
-  CharacterReport 
+export type {
+  CharacterFilters,
+  CharacterSearchParams,
+  CharacterStats,
+  CharacterReport,
 };

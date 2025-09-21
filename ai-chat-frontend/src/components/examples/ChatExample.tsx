@@ -6,7 +6,7 @@ import {
   connectWebSocket,
   sendTypingIndicator,
   markAsRead,
-  wsManager
+  wsManager,
 } from '../../services/chatApi';
 import { Chat, Message } from '../../types/chat';
 import { PaginatedResponse } from '../../types';
@@ -30,7 +30,7 @@ const ChatInterfaceExample: React.FC<ChatInterfaceProps> = ({ chatId }) => {
       setIsLoading(true);
       const [chatData, messagesResponse] = await Promise.all([
         getChat(chatId),
-        getMessages(chatId, 1, 50)
+        getMessages(chatId, 1, 50),
       ]);
 
       setChat(chatData);

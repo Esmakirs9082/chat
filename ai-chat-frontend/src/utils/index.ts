@@ -1,79 +1,62 @@
-import { type ClassValue, clsx } from 'clsx';
-import { twMerge } from 'tailwind-merge';
+// Временная замена clsx и twMerge до установки зависимостей
+// import { clsx, type ClassValue } from 'clsx';
+// import { twMerge } from 'tailwind-merge';
 
-// Утилиты
-export const formatDate = (date: Date | string): string => {
+// Простая утилита для объединения классов
+export function cn(...inputs: (string | undefined | null | boolean)[]): string {
+  return inputs.filter(Boolean).join(' ').replace(/\s+/g, ' ').trim();
+}
+
+// Дополнительные утилиты производительности будут добавлены по мере необходимости
+// export * from './performanceUtils';
+
+// Дополнительные вспомогательные функции
+export const formatDate = (timestamp: number): string => {
+  const date = new Date(timestamp);
   const now = new Date();
-  const messageDate = new Date(date);
-  const diffMs = now.getTime() - messageDate.getTime();
-  const diffMins = Math.floor(diffMs / (1000 * 60));
-  const diffHours = Math.floor(diffMs / (1000 * 60 * 60));
-  const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
-  
-  // Менее минуты
-  if (diffMins < 1) {
-    return 'Только что';
+  const diff = now.getTime() - date.getTime();
+
+  // Менее минуты назад
+  if (diff < 60000) {
+    return 'только что';
   }
-  
-  // Менее часа
-  if (diffMins < 60) {
-    return `${diffMins} мин назад`;
+
+  // Менее часа назад
+  if (diff < 3600000) {
+    const minutes = Math.floor(diff / 60000);
+    return `${minutes} мин. назад`;
   }
-  
-  // Менее суток
-  if (diffHours < 24) {
-    return `${diffHours} ч назад`;
+
+  // Менее дня назад
+  if (diff < 86400000) {
+    const hours = Math.floor(diff / 3600000);
+    return `${hours} ч. назад`;
   }
-  
-  // Менее недели
-  if (diffDays < 7) {
-    return `${diffDays} дн назад`;
+
+  // Менее недели назад
+  if (diff < 604800000) {
+    const days = Math.floor(diff / 86400000);
+    return `${days} дн. назад`;
   }
-  
+
   // Более недели - показываем дату
-  return messageDate.toLocaleDateString('ru-RU', {
-    day: '2-digit',
-    month: '2-digit',
-    year: messageDate.getFullYear() !== now.getFullYear() ? 'numeric' : undefined
-  });
+  return date.toLocaleDateString('ru-RU');
 };
 
-/**
- * Форматирует время для отображения
- */
-export const formatTime = (date: Date | string): string => {
-  const messageDate = new Date(date);
-  return messageDate.toLocaleTimeString('ru-RU', {
-    hour: '2-digit',
-    minute: '2-digit'
-  });
+export const generateId = (): string => {
+  return Math.random().toString(36).substr(2, 9) + Date.now().toString(36);
 };
 
 export const truncateText = (text: string, maxLength: number): string => {
   if (text.length <= maxLength) return text;
-  return text.substring(0, maxLength) + '...';
+  return text.substr(0, maxLength) + '...';
 };
 
-export const generateId = (): string => {
-  return Math.random().toString(36).substring(2) + Date.now().toString(36);
+export const isValidEmail = (email: string): boolean => {
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  return emailRegex.test(email);
 };
 
-/**
- * Дебаунс функции
- */
-export const debounce = <T extends (...args: any[]) => any>(
-  func: T,
-  wait: number
-): ((...args: Parameters<T>) => void) => {
-  let timeout: NodeJS.Timeout;
-  
-  return (...args: Parameters<T>) => {
-    clearTimeout(timeout);
-    timeout = setTimeout(() => func.apply(null, args), wait);
-  };
+export const capitalizeFirst = (text: string): string => {
+  return text.charAt(0).toUpperCase() + text.slice(1);
 };
-
-// Utility для объединения классов Tailwind
-export function cn(...inputs: ClassValue[]) {
-  return twMerge(clsx(inputs));
-}

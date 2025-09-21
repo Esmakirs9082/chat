@@ -1,7 +1,7 @@
 // Subscription components exports
 
 export { default as SubscriptionPlans } from './SubscriptionPlans';
-export { default as PaymentMethods } from './PaymentMethods';  
+export { default as PaymentMethods } from './PaymentMethods';
 export { default as PaymentHistory } from './PaymentHistory';
 export { default as UsageStats } from './UsageStats';
 
@@ -12,5 +12,5 @@ export type {
   PaymentMethod,
   PaymentHistory as PaymentHistoryType,
   PaymentMethodData,
-  UsageStats as UsageStatsType
+  UsageStats as UsageStatsType,
 } from '../../services/subscriptionApi';

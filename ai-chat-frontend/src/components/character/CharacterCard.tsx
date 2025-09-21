@@ -8,19 +8,21 @@ import Button from '../ui/Button';
 
 interface CharacterCardProps {
   character: Character;
-  onSelect: () => void;
+  onSelect: (character: Character) => void;
+  onViewProfile?: (character: Character) => void;
   showStats?: boolean;
 }
 
 const CharacterCard: React.FC<CharacterCardProps> = ({
   character,
   onSelect,
+  onViewProfile,
   showStats = false,
 }) => {
   const { user } = useAuthStore();
   const { favorites, toggleFavorite } = useCharacterStore();
   const { nsfwEnabled } = useSettingsStore();
-  
+
   const [showNsfwWarning, setShowNsfwWarning] = useState(false);
   const [imageError, setImageError] = useState(false);
 
@@ -31,7 +33,7 @@ const CharacterCard: React.FC<CharacterCardProps> = ({
   const getInitials = (name: string) => {
     return name
       .split(' ')
-      .map(word => word.charAt(0).toUpperCase())
+      .map((word) => word.charAt(0).toUpperCase())
       .slice(0, 2)
       .join('');
   };
@@ -42,7 +44,7 @@ const CharacterCard: React.FC<CharacterCardProps> = ({
       setShowNsfwWarning(true);
       return;
     }
-    onSelect();
+    onSelect(character);
   };
 
   // Обработка клика по избранному
@@ -60,12 +62,12 @@ const CharacterCard: React.FC<CharacterCardProps> = ({
   // Принятие NSFW контента
   const handleNsfwAccept = () => {
     setShowNsfwWarning(false);
-    onSelect();
+    onSelect(character);
   };
 
   return (
     <>
-      <div 
+      <div
         className="group relative bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden cursor-pointer transition-all duration-200 hover:scale-105 hover:shadow-lg"
         onClick={handleCardClick}
       >
@@ -84,10 +86,10 @@ const CharacterCard: React.FC<CharacterCardProps> = ({
             onClick={handleFavoriteClick}
             className="absolute top-2 left-2 z-10 p-2 rounded-full bg-white/80 backdrop-blur-sm opacity-0 group-hover:opacity-100 transition-opacity duration-200 hover:bg-white"
           >
-            <Heart 
+            <Heart
               className={`w-4 h-4 transition-colors ${
-                isFavorite 
-                  ? 'text-red-500 fill-red-500' 
+                isFavorite
+                  ? 'text-red-500 fill-red-500'
                   : 'text-gray-600 hover:text-red-500'
               }`}
             />
@@ -123,19 +125,34 @@ const CharacterCard: React.FC<CharacterCardProps> = ({
             </div>
           )}
 
-          {/* Chat Button - появляется при hover */}
+          {/* Action Buttons - появляются при hover */}
           <div className="absolute inset-x-0 bottom-0 p-4 bg-gradient-to-t from-black/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-200">
-            <Button
-              onClick={(e: React.MouseEvent) => {
-                e.stopPropagation();
-                handleCardClick();
-              }}
-              className="w-full bg-white/90 text-gray-900 hover:bg-white"
-              size="sm"
-            >
-              <MessageCircle className="w-4 h-4 mr-2" />
-              Начать чат
-            </Button>
+            <div className="flex gap-2">
+              <Button
+                onClick={(e: React.MouseEvent) => {
+                  e.stopPropagation();
+                  handleCardClick();
+                }}
+                className="flex-1 bg-white/90 text-gray-900 hover:bg-white"
+                size="sm"
+              >
+                <MessageCircle className="w-4 h-4 mr-2" />
+                Чат
+              </Button>
+              {onViewProfile && (
+                <Button
+                  onClick={(e: React.MouseEvent) => {
+                    e.stopPropagation();
+                    onViewProfile(character);
+                  }}
+                  variant="outline"
+                  className="flex-1 bg-white/10 border-white/20 text-white hover:bg-white/20"
+                  size="sm"
+                >
+                  Профиль
+                </Button>
+              )}
+            </div>
           </div>
         </div>
 
@@ -194,16 +211,16 @@ const CharacterCard: React.FC<CharacterCardProps> = ({
               <div className="w-12 h-12 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
                 <Eye className="w-6 h-6 text-red-600" />
               </div>
-              
+
               <h3 className="text-lg font-semibold text-gray-900 mb-2">
                 Контент для взрослых
               </h3>
-              
+
               <p className="text-sm text-gray-600 mb-6">
-                Этот персонаж содержит контент для взрослых (18+). 
-                Вы можете включить отображение такого контента в настройках.
+                Этот персонаж содержит контент для взрослых (18+). Вы можете
+                включить отображение такого контента в настройках.
               </p>
-              
+
               <div className="flex gap-3">
                 <Button
                   variant="outline"

@@ -7,7 +7,7 @@ import {
   importCharacter,
   getCharacterTags,
   getCharacterCategories,
-  uploadCharacterImages
+  uploadCharacterImages,
 } from '../../services/characterApi';
 import { CharacterCreateForm } from '../../types';
 
@@ -19,9 +19,9 @@ export const CharacterFormExample: React.FC = () => {
     personality: [],
     tags: [],
     avatar: undefined,
-    isNsfw: false
+    isNsfw: false,
   });
-  
+
   const [loading, setLoading] = useState(false);
   const [availableTags, setAvailableTags] = useState<string[]>([]);
   const [categories, setCategories] = useState<any[]>([]);
@@ -35,7 +35,7 @@ export const CharacterFormExample: React.FC = () => {
       try {
         const [tags, cats] = await Promise.all([
           getCharacterTags(),
-          getCharacterCategories()
+          getCharacterCategories(),
         ]);
         setAvailableTags(tags);
         setCategories(cats);
@@ -43,23 +43,23 @@ export const CharacterFormExample: React.FC = () => {
         console.error('Ошибка загрузки опций:', error);
       }
     };
-    
+
     loadOptions();
   }, []);
 
   // Создание персонажа
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (!formData.name.trim() || !formData.description.trim()) {
       alert('Заполните обязательные поля');
       return;
     }
-    
+
     try {
       setLoading(true);
       const newCharacter = await createCharacter(formData);
-      
+
       // Если есть дополнительные изображения, загружаем их
       if (selectedFiles.length > 0) {
         await uploadCharacterImages(
@@ -68,9 +68,9 @@ export const CharacterFormExample: React.FC = () => {
           (progress) => console.log(`Загрузка изображений: ${progress}%`)
         );
       }
-      
+
       alert('Персонаж успешно создан!');
-      
+
       // Сбрасываем форму
       setFormData({
         name: '',
@@ -78,11 +78,10 @@ export const CharacterFormExample: React.FC = () => {
         personality: [],
         tags: [],
         avatar: undefined,
-        isNsfw: false
+        isNsfw: false,
       });
       setSelectedFiles([]);
       setSelectedCategory('');
-      
     } catch (error) {
       console.error('Ошибка создания персонажа:', error);
       alert('Ошибка при создании персонажа');
@@ -95,7 +94,10 @@ export const CharacterFormExample: React.FC = () => {
   const handleClone = async (characterId: string) => {
     try {
       setLoading(true);
-      const clonedCharacter = await cloneCharacter(characterId, `${formData.name} (копия)`);
+      const clonedCharacter = await cloneCharacter(
+        characterId,
+        `${formData.name} (копия)`
+      );
       alert(`Персонаж склонирован: ${clonedCharacter.name}`);
     } catch (error) {
       console.error('Ошибка клонирования:', error);
@@ -105,7 +107,10 @@ export const CharacterFormExample: React.FC = () => {
   };
 
   // Экспорт персонажа
-  const handleExport = async (characterId: string, format: 'json' | 'tavern' | 'characterai') => {
+  const handleExport = async (
+    characterId: string,
+    format: 'json' | 'tavern' | 'characterai'
+  ) => {
     try {
       const result = await exportCharacter(characterId, format);
       // Открываем ссылку для скачивания
@@ -116,11 +121,14 @@ export const CharacterFormExample: React.FC = () => {
   };
 
   // Импорт персонажа
-  const handleImport = async (file: File, format: 'json' | 'tavern' | 'characterai') => {
+  const handleImport = async (
+    file: File,
+    format: 'json' | 'tavern' | 'characterai'
+  ) => {
     try {
       setLoading(true);
       const importedCharacter = await importCharacter(file, format);
-      
+
       // Заполняем форму данными из импортированного персонажа
       setFormData({
         name: importedCharacter.name,
@@ -128,9 +136,9 @@ export const CharacterFormExample: React.FC = () => {
         personality: importedCharacter.personality || [],
         tags: importedCharacter.tags || [],
         avatar: undefined,
-        isNsfw: importedCharacter.isNsfw || false
+        isNsfw: importedCharacter.isNsfw || false,
       });
-      
+
       alert('Персонаж успешно импортирован!');
     } catch (error) {
       console.error('Ошибка импорта:', error);
@@ -142,34 +150,46 @@ export const CharacterFormExample: React.FC = () => {
 
   // Добавление/удаление тегов
   const handleTagToggle = (tag: string) => {
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
-      tags: prev.tags?.includes(tag) 
-        ? prev.tags.filter(t => t !== tag)
-        : [...(prev.tags || []), tag]
+      tags: prev.tags?.includes(tag)
+        ? prev.tags.filter((t) => t !== tag)
+        : [...(prev.tags || []), tag],
     }));
   };
 
   // Добавление/удаление черт характера
   const handlePersonalityToggle = (trait: string) => {
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
-      personality: prev.personality?.some(p => p.trait === trait)
-        ? prev.personality.filter(p => p.trait !== trait)
-        : [...(prev.personality || []), { trait, value: 0.8 }] // Добавляем со значением по умолчанию
+      personality: prev.personality?.some((p) => p.trait === trait)
+        ? prev.personality.filter((p) => p.trait !== trait)
+        : [...(prev.personality || []), { trait, value: 0.8 }], // Добавляем со значением по умолчанию
     }));
   };
 
   const commonPersonalityTraits = [
-    'дружелюбный', 'застенчивый', 'уверенный', 'игривый', 'серьезный',
-    'умный', 'забавный', 'загадочный', 'энергичный', 'спокойный',
-    'романтичный', 'циничный', 'оптимистичный', 'пессимистичный', 'храбрый'
+    'дружелюбный',
+    'застенчивый',
+    'уверенный',
+    'игривый',
+    'серьезный',
+    'умный',
+    'забавный',
+    'загадочный',
+    'энергичный',
+    'спокойный',
+    'романтичный',
+    'циничный',
+    'оптимистичный',
+    'пессимистичный',
+    'храбрый',
   ];
 
   return (
     <div className="character-form max-w-4xl mx-auto p-6">
       <h1 className="text-3xl font-bold mb-8">Создание персонажа</h1>
-      
+
       {/* Импорт персонажа */}
       <div className="import-section mb-8 p-4 bg-gray-50 rounded-lg">
         <h3 className="text-lg font-semibold mb-4">Импорт персонажа</h3>
@@ -180,8 +200,11 @@ export const CharacterFormExample: React.FC = () => {
             onChange={(e) => {
               const file = e.target.files?.[0];
               if (file) {
-                const format = file.name.endsWith('.json') ? 'json' :
-                              file.name.endsWith('.png') ? 'tavern' : 'characterai';
+                const format = file.name.endsWith('.json')
+                  ? 'json'
+                  : file.name.endsWith('.png')
+                    ? 'tavern'
+                    : 'characterai';
                 handleImport(file, format);
               }
             }}
@@ -203,17 +226,17 @@ export const CharacterFormExample: React.FC = () => {
             <input
               type="text"
               value={formData.name}
-              onChange={(e) => setFormData(prev => ({ ...prev, name: e.target.value }))}
+              onChange={(e) =>
+                setFormData((prev) => ({ ...prev, name: e.target.value }))
+              }
               className="w-full p-3 border border-gray-300 rounded-lg"
               placeholder="Введите имя персонажа"
               required
             />
           </div>
-          
+
           <div>
-            <label className="block text-sm font-medium mb-2">
-              Категория
-            </label>
+            <label className="block text-sm font-medium mb-2">Категория</label>
             <select
               value={selectedCategory}
               onChange={(e) => setSelectedCategory(e.target.value)}
@@ -236,7 +259,9 @@ export const CharacterFormExample: React.FC = () => {
           </label>
           <textarea
             value={formData.description}
-            onChange={(e) => setFormData(prev => ({ ...prev, description: e.target.value }))}
+            onChange={(e) =>
+              setFormData((prev) => ({ ...prev, description: e.target.value }))
+            }
             className="w-full p-3 border border-gray-300 rounded-lg h-32"
             placeholder="Опишите внешность, характер, предысторию персонажа..."
             required
@@ -309,7 +334,7 @@ export const CharacterFormExample: React.FC = () => {
                 type="button"
                 onClick={() => handlePersonalityToggle(trait)}
                 className={`p-2 text-sm rounded-full border transition-colors ${
-                  formData.personality?.some(p => p.trait === trait)
+                  formData.personality?.some((p) => p.trait === trait)
                     ? 'bg-blue-500 text-white border-blue-500'
                     : 'bg-gray-100 text-gray-700 border-gray-300 hover:bg-gray-200'
                 }`}
@@ -322,9 +347,7 @@ export const CharacterFormExample: React.FC = () => {
 
         {/* Теги */}
         <div>
-          <label className="block text-sm font-medium mb-2">
-            Теги
-          </label>
+          <label className="block text-sm font-medium mb-2">Теги</label>
           <div className="grid grid-cols-4 sm:grid-cols-6 gap-2 max-h-40 overflow-y-auto">
             {availableTags.slice(0, 30).map((tag) => (
               <button
@@ -341,7 +364,7 @@ export const CharacterFormExample: React.FC = () => {
               </button>
             ))}
           </div>
-          
+
           {/* Выбранные теги */}
           {formData.tags && formData.tags.length > 0 && (
             <div className="mt-4">
@@ -373,7 +396,9 @@ export const CharacterFormExample: React.FC = () => {
             <input
               type="checkbox"
               checked={formData.isNsfw}
-              onChange={(e) => setFormData(prev => ({ ...prev, isNsfw: e.target.checked }))}
+              onChange={(e) =>
+                setFormData((prev) => ({ ...prev, isNsfw: e.target.checked }))
+              }
               className="w-4 h-4"
             />
             <span className="text-sm font-medium">
@@ -391,7 +416,7 @@ export const CharacterFormExample: React.FC = () => {
           >
             {loading ? 'Создание...' : 'Создать персонажа'}
           </button>
-          
+
           <button
             type="button"
             onClick={() => {
@@ -401,7 +426,7 @@ export const CharacterFormExample: React.FC = () => {
                 personality: [],
                 tags: [],
                 avatar: undefined,
-                isNsfw: false
+                isNsfw: false,
               });
               setSelectedFiles([]);
               setSelectedCategory('');
@@ -418,7 +443,8 @@ export const CharacterFormExample: React.FC = () => {
       <div className="export-section mt-8 p-4 bg-blue-50 rounded-lg">
         <h3 className="text-lg font-semibold mb-4">Экспорт персонажа</h3>
         <p className="text-sm text-gray-600 mb-4">
-          После создания персонажа вы сможете экспортировать его в различных форматах
+          После создания персонажа вы сможете экспортировать его в различных
+          форматах
         </p>
         <div className="flex gap-2">
           <button

@@ -4,7 +4,8 @@ import { Eye, EyeOff } from 'lucide-react';
 
 type InputSize = 'sm' | 'md' | 'lg';
 
-export interface InputProps extends Omit<React.InputHTMLAttributes<HTMLInputElement>, 'size'> {
+export interface InputProps
+  extends Omit<React.InputHTMLAttributes<HTMLInputElement>, 'size'> {
   label?: string;
   placeholder?: string;
   error?: string;
@@ -37,13 +38,16 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
     ref
   ) => {
     const [showPassword, setShowPassword] = useState<boolean>(false);
-  const isPassword = type === 'password';
-  const inputType = isPassword && (showPassword || props.showPasswordToggle) ? 'text' : type;
+    const isPassword = type === 'password';
+    const inputType =
+      isPassword && (showPassword || props.showPasswordToggle) ? 'text' : type;
 
     return (
       <div className="w-full">
         {label && (
-          <label className="block mb-1 text-sm font-medium text-gray-300 dark:text-gray-200">{label}</label>
+          <label className="block mb-1 text-sm font-medium text-gray-300 dark:text-gray-200">
+            {label}
+          </label>
         )}
         <div
           className={clsx(
@@ -54,9 +58,7 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
             'transition-colors duration-150'
           )}
         >
-          {leftIcon && (
-            <span className="pl-2 text-gray-400">{leftIcon}</span>
-          )}
+          {leftIcon && <span className="pl-2 text-gray-400">{leftIcon}</span>}
           <input
             ref={ref}
             type={inputType}
@@ -85,9 +87,7 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
         {helperText && !error && (
           <div className="mt-1 text-xs text-gray-400">{helperText}</div>
         )}
-        {error && (
-          <div className="mt-1 text-xs text-red-500">{error}</div>
-        )}
+        {error && <div className="mt-1 text-xs text-red-500">{error}</div>}
       </div>
     );
   }

@@ -97,7 +97,9 @@ export const getMessages = async (
   limit: number = 50
 ): Promise<PaginatedResponse<Message>> => {
   const params = { page, limit };
-  return await get<PaginatedResponse<Message>>(`/chats/${chatId}/messages`, { params });
+  return await get<PaginatedResponse<Message>>(`/chats/${chatId}/messages`, {
+    params,
+  });
 };
 
 /**
@@ -155,45 +157,47 @@ export const removeReaction = async (
 export const connectWebSocket = (chatId: string): WebSocket => {
   const wsUrl = (import.meta as any).env?.VITE_WS_URL || 'ws://localhost:3000';
   const token = localStorage.getItem('auth-token') || '';
-  
-  const ws = new WebSocket(`${wsUrl}/chat/${chatId}?token=${encodeURIComponent(token)}`);
-  
+
+  const ws = new WebSocket(
+    `${wsUrl}/chat/${chatId}?token=${encodeURIComponent(token)}`
+  );
+
   ws.onopen = (event) => {
     console.log(`[WebSocket] Connected to chat ${chatId}`, event);
   };
-  
+
   ws.onmessage = (event) => {
     try {
       const message: WebSocketMessage = JSON.parse(event.data);
       console.log(`[WebSocket] Received message:`, message);
-      
+
       // Emit custom events для обработки в компонентах
       const customEvent = new CustomEvent('websocket-message', {
-        detail: { message, chatId }
+        detail: { message, chatId },
       });
       window.dispatchEvent(customEvent);
-      
     } catch (error) {
       console.error('[WebSocket] Error parsing message:', error);
     }
   };
-  
+
   ws.onerror = (error) => {
     console.error(`[WebSocket] Connection error for chat ${chatId}:`, error);
   };
-  
+
   ws.onclose = (event) => {
     console.log(`[WebSocket] Connection closed for chat ${chatId}:`, event);
-    
+
     // Автоматическое переподключение через 5 секунд если соединение оборвалось неожиданно
-    if (event.code !== 1000) { // 1000 = normal closure
+    if (event.code !== 1000) {
+      // 1000 = normal closure
       setTimeout(() => {
         console.log(`[WebSocket] Attempting to reconnect to chat ${chatId}`);
         connectWebSocket(chatId);
       }, 5000);
     }
   };
-  
+
   return ws;
 };
 
@@ -230,7 +234,9 @@ export const searchMessages = async (
   limit: number = 20
 ): Promise<PaginatedResponse<Message>> => {
   const params = { q: query, page, limit };
-  return await get<PaginatedResponse<Message>>(`/chats/${chatId}/search`, { params });
+  return await get<PaginatedResponse<Message>>(`/chats/${chatId}/search`, {
+    params,
+  });
 };
 
 /**
@@ -240,7 +246,9 @@ export const exportChatHistory = async (
   chatId: string,
   format: 'json' | 'txt' | 'html' = 'json'
 ): Promise<{ downloadUrl: string }> => {
-  return await post<{ downloadUrl: string }>(`/chats/${chatId}/export`, { format });
+  return await post<{ downloadUrl: string }>(`/chats/${chatId}/export`, {
+    format,
+  });
 };
 
 /**
@@ -293,20 +301,20 @@ export const batchChatOperations = {
 export class ChatWebSocketManager {
   private connections: Map<string, WebSocket> = new Map();
   private reconnectTimeouts: Map<string, NodeJS.Timeout> = new Map();
-  
+
   /**
    * Подключиться к чату
    */
   connect(chatId: string): WebSocket {
     // Закрываем существующее соединение если есть
     this.disconnect(chatId);
-    
+
     const ws = connectWebSocket(chatId);
     this.connections.set(chatId, ws);
-    
+
     return ws;
   }
-  
+
   /**
    * Отключиться от чата
    */
@@ -316,7 +324,7 @@ export class ChatWebSocketManager {
       ws.close(1000, 'Manual disconnect');
       this.connections.delete(chatId);
     }
-    
+
     // Отменяем таймер переподключения если есть
     const timeout = this.reconnectTimeouts.get(chatId);
     if (timeout) {
@@ -324,7 +332,7 @@ export class ChatWebSocketManager {
       this.reconnectTimeouts.delete(chatId);
     }
   }
-  
+
   /**
    * Отключиться от всех чатов
    */
@@ -333,14 +341,14 @@ export class ChatWebSocketManager {
       this.disconnect(chatId);
     });
   }
-  
+
   /**
    * Получить соединение для чата
    */
   getConnection(chatId: string): WebSocket | undefined {
     return this.connections.get(chatId);
   }
-  
+
   /**
    * Проверить статус соединения
    */
@@ -348,7 +356,7 @@ export class ChatWebSocketManager {
     const ws = this.connections.get(chatId);
     return ws ? ws.readyState === WebSocket.OPEN : false;
   }
-  
+
   /**
    * Отправить сообщение через WebSocket
    */
@@ -372,15 +380,12 @@ export const wsManager = new ChatWebSocketManager();
  */
 export const getCancellableMessages = (chatId: string, page: number = 1) => {
   const cancelTokenSource = createCancelToken();
-  
-  const promise = get<PaginatedResponse<Message>>(
-    `/chats/${chatId}/messages`,
-    { 
-      params: { page },
-      cancelToken: cancelTokenSource.token 
-    }
-  );
-  
+
+  const promise = get<PaginatedResponse<Message>>(`/chats/${chatId}/messages`, {
+    params: { page },
+    cancelToken: cancelTokenSource.token,
+  });
+
   return {
     promise,
     cancel: () => cancelTokenSource.cancel('Request cancelled'),
@@ -397,7 +402,7 @@ export default {
   deleteChat,
   archiveChat,
   unarchiveChat,
-  
+
   // Messages
   getMessages,
   sendMessage,
@@ -408,17 +413,17 @@ export default {
   markAsRead,
   searchMessages,
   clearChatHistory,
-  
+
   // Real-time
   connectWebSocket,
   sendTypingIndicator,
   wsManager,
-  
+
   // Additional features
   exportChatHistory,
   getChatStats,
   batch: batchChatOperations,
-  
+
   // Utilities
   getCancellableMessages,
 };

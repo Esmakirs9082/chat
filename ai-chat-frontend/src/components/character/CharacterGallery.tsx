@@ -1,23 +1,23 @@
-import React, { useState, useEffect, useMemo, useCallback, useRef } from 'react';
+import React, {
+  useState,
+  useEffect,
+  useMemo,
+  useCallback,
+  useRef,
+} from 'react';
 import { Search, Filter, Star, Plus, RefreshCw } from 'lucide-react';
 import { cn } from '../../utils';
 import { useCharacterStore } from '../../stores/characterStore';
 import { Character } from '../../types';
 import Button from '../ui/Button';
 import Input from '../ui/Input';
-
-// Типы для фильтров
-interface CharacterFilters {
-  search?: string;
-  categories?: string[];
-  isNSFW?: boolean;
-  sortBy?: 'popular' | 'newest' | 'alphabetical';
-  featured?: boolean;
-}
+import CharacterCard from './CharacterCard';
+import type { CharacterFilters } from './CharacterFilters';
 
 interface CharacterGalleryProps {
   filters?: CharacterFilters;
   onCharacterSelect: (character: Character) => void;
+  onViewProfile?: (character: Character) => void;
   className?: string;
 }
 
@@ -37,121 +37,6 @@ const CharacterCardSkeleton: React.FC = () => (
   </div>
 );
 
-// Компонент карточки персонажа
-interface CharacterCardProps {
-  character: Character;
-  onSelect: (character: Character) => void;
-}
-
-const CharacterCard: React.FC<CharacterCardProps> = ({ character, onSelect }) => {
-  const [imageLoaded, setImageLoaded] = useState(false);
-  const [imageError, setImageError] = useState(false);
-
-  const handleImageLoad = () => {
-    setImageLoaded(true);
-  };
-
-  const handleImageError = () => {
-    setImageError(true);
-    setImageLoaded(true);
-  };
-
-  return (
-    <div
-      className="bg-white rounded-xl shadow-sm border hover:shadow-md transition-all duration-200 cursor-pointer group overflow-hidden"
-      onClick={() => onSelect(character)}
-    >
-      {/* Character Image */}
-      <div className="relative aspect-[3/4] bg-gray-100 overflow-hidden">
-        {!imageLoaded && !imageError && (
-          <div className="absolute inset-0 bg-gray-200 animate-pulse" />
-        )}
-        
-        {!imageError ? (
-          <img
-            src={character.avatar}
-            alt={character.name}
-            className={cn(
-              'w-full h-full object-cover transition-all duration-300',
-              'group-hover:scale-105',
-              imageLoaded ? 'opacity-100' : 'opacity-0'
-            )}
-            onLoad={handleImageLoad}
-            onError={handleImageError}
-            loading="lazy"
-          />
-        ) : (
-          <div className="w-full h-full bg-gradient-to-br from-purple-400 to-pink-400 flex items-center justify-center">
-            <span className="text-white font-bold text-4xl">
-              {character.name.charAt(0).toUpperCase()}
-            </span>
-          </div>
-        )}
-
-        {/* NSFW Badge */}
-        {character.isNsfw && (
-          <div className="absolute top-2 left-2 bg-red-500 text-white text-xs px-2 py-1 rounded-full font-medium">
-            18+
-          </div>
-        )}
-
-        {/* Featured Badge - используем высокий favoriteCount как featured */}
-        {character.favoriteCount > 100 && (
-          <div className="absolute top-2 right-2 bg-yellow-500 text-white p-1 rounded-full">
-            <Star className="w-3 h-3 fill-current" />
-          </div>
-        )}
-
-        {/* Hover Overlay */}
-        <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors duration-200" />
-      </div>
-
-      {/* Character Info */}
-      <div className="p-4 space-y-2">
-        <h3 className="font-semibold text-gray-900 truncate group-hover:text-blue-600 transition-colors">
-          {character.name}
-        </h3>
-        
-        <p className="text-sm text-gray-600 line-clamp-2 leading-relaxed">
-          {character.description}
-        </p>
-
-        <div className="flex items-center justify-between pt-2">
-          <div className="flex items-center space-x-1">
-            <Star className="w-3 h-3 fill-yellow-400 text-yellow-400" />
-            <span className="text-xs text-gray-500 font-medium">
-              {((character.favoriteCount || 0) / 10).toFixed(1)}
-            </span>
-          </div>
-
-          <div className="text-xs text-gray-500">
-            {character.messageCount || 0} чатов
-          </div>
-        </div>
-
-        {/* Categories */}
-        {character.tags && character.tags.length > 0 && (
-          <div className="flex flex-wrap gap-1 pt-1">
-            {character.tags.slice(0, 2).map((tag) => (
-              <span
-                key={tag}
-                className="text-xs bg-gray-100 text-gray-600 px-2 py-1 rounded-full"
-              >
-                {tag}
-              </span>
-            ))}
-            {character.tags.length > 2 && (
-              <span className="text-xs text-gray-500">
-                +{character.tags.length - 2}
-              </span>
-            )}
-          </div>
-        )}
-      </div>
-    </div>
-  );
-};
-
 // Компонент фильтр чипа
 interface FilterChipProps {
   label: string;
@@ -160,7 +45,12 @@ interface FilterChipProps {
   variant?: 'default' | 'nsfw';
 }
 
-const FilterChip: React.FC<FilterChipProps> = ({ label, active, onClick, variant = 'default' }) => (
+const FilterChip: React.FC<FilterChipProps> = ({
+  label,
+  active,
+  onClick,
+  variant = 'default',
+}) => (
   <button
     onClick={onClick}
     className={cn(
@@ -181,27 +71,31 @@ const FilterChip: React.FC<FilterChipProps> = ({ label, active, onClick, variant
 const CharacterGallery: React.FC<CharacterGalleryProps> = ({
   filters: externalFilters,
   onCharacterSelect,
+  onViewProfile,
   className,
 }) => {
   const { characters, isLoading, loadCharacters } = useCharacterStore();
-  
+
   // Простая имитация hasMore для пагинации
   const totalCount = 1000; // Мок данные общего количества
-  
+
   // Локальные фильтры
   const [localFilters, setLocalFilters] = useState<CharacterFilters>({
     search: '',
     categories: [],
+    tags: [],
+    rating: 0,
     isNSFW: false,
     sortBy: 'popular',
-    featured: false,
+    timeFilter: 'all',
+    creatorFilter: 'all',
     ...externalFilters,
   });
 
   const [searchQuery, setSearchQuery] = useState('');
   const [showFilters, setShowFilters] = useState(false);
   const [isRefreshing, setIsRefreshing] = useState(false);
-  
+
   const scrollRef = useRef<HTMLDivElement>(null);
   const searchTimeoutRef = useRef<NodeJS.Timeout>();
 
@@ -212,7 +106,7 @@ const CharacterGallery: React.FC<CharacterGalleryProps> = ({
     }
 
     searchTimeoutRef.current = setTimeout(() => {
-      setLocalFilters(prev => ({ ...prev, search: searchQuery }));
+      setLocalFilters((prev) => ({ ...prev, search: searchQuery }));
     }, 300);
 
     return () => {
@@ -228,10 +122,17 @@ const CharacterGallery: React.FC<CharacterGalleryProps> = ({
 
     // Поиск
     if (localFilters.search) {
-      result = result.filter(char =>
-        char.name.toLowerCase().includes(localFilters.search!.toLowerCase()) ||
-        char.description?.toLowerCase().includes(localFilters.search!.toLowerCase()) ||
-        char.tags?.some(tag => tag.toLowerCase().includes(localFilters.search!.toLowerCase()))
+      result = result.filter(
+        (char) =>
+          char.name
+            .toLowerCase()
+            .includes(localFilters.search!.toLowerCase()) ||
+          char.description
+            ?.toLowerCase()
+            .includes(localFilters.search!.toLowerCase()) ||
+          char.tags?.some((tag) =>
+            tag.toLowerCase().includes(localFilters.search!.toLowerCase())
+          )
       );
     }
 
@@ -246,7 +147,7 @@ const CharacterGallery: React.FC<CharacterGalleryProps> = ({
     if (!scrollRef.current || !hasMore || isLoading) return;
 
     const { scrollTop, scrollHeight, clientHeight } = scrollRef.current;
-    
+
     if (scrollTop + clientHeight >= scrollHeight - 200) {
       loadCharacters();
     }
@@ -276,7 +177,14 @@ const CharacterGallery: React.FC<CharacterGalleryProps> = ({
   };
 
   // Категории для фильтров (mock данные)
-  const categories = ['Аниме', 'Фэнтези', 'Sci-Fi', 'Романтика', 'Приключения', 'Комедия'];
+  const categories = [
+    'Аниме',
+    'Фэнтези',
+    'Sci-Fi',
+    'Романтика',
+    'Приключения',
+    'Комедия',
+  ];
   const sortOptions = [
     { value: 'popular', label: 'Популярные' },
     { value: 'newest', label: 'Новые' },
@@ -296,7 +204,7 @@ const CharacterGallery: React.FC<CharacterGalleryProps> = ({
             onChange={(e) => setSearchQuery(e.target.value)}
             className="pl-10 pr-12"
           />
-          
+
           <button
             onClick={() => setShowFilters(!showFilters)}
             className={cn(
@@ -314,19 +222,23 @@ const CharacterGallery: React.FC<CharacterGalleryProps> = ({
           <div className="space-y-3">
             {/* Categories */}
             <div>
-              <h4 className="text-sm font-medium text-gray-700 mb-2">Категории</h4>
+              <h4 className="text-sm font-medium text-gray-700 mb-2">
+                Категории
+              </h4>
               <div className="flex flex-wrap gap-2">
                 {categories.map((category) => (
                   <FilterChip
                     key={category}
                     label={category}
-                    active={localFilters.categories?.includes(category) || false}
+                    active={
+                      localFilters.categories?.includes(category) || false
+                    }
                     onClick={() => {
-                      setLocalFilters(prev => ({
+                      setLocalFilters((prev) => ({
                         ...prev,
                         categories: prev.categories?.includes(category)
-                          ? prev.categories.filter(c => c !== category)
-                          : [...(prev.categories || []), category]
+                          ? prev.categories.filter((c) => c !== category)
+                          : [...(prev.categories || []), category],
                       }));
                     }}
                   />
@@ -340,14 +252,24 @@ const CharacterGallery: React.FC<CharacterGalleryProps> = ({
                 <FilterChip
                   label="18+"
                   active={localFilters.isNSFW || false}
-                  onClick={() => setLocalFilters(prev => ({ ...prev, isNSFW: !prev.isNSFW }))}
+                  onClick={() =>
+                    setLocalFilters((prev) => ({
+                      ...prev,
+                      isNSFW: !prev.isNSFW,
+                    }))
+                  }
                   variant="nsfw"
                 />
               </div>
 
               <select
                 value={localFilters.sortBy}
-                onChange={(e) => setLocalFilters(prev => ({ ...prev, sortBy: e.target.value as any }))}
+                onChange={(e) =>
+                  setLocalFilters((prev) => ({
+                    ...prev,
+                    sortBy: e.target.value as any,
+                  }))
+                }
                 className="px-3 py-1.5 text-sm border border-gray-200 rounded-full focus:outline-none focus:ring-2 focus:ring-blue-500"
               >
                 {sortOptions.map((option) => (
@@ -362,10 +284,14 @@ const CharacterGallery: React.FC<CharacterGalleryProps> = ({
       </div>
 
       {/* Content */}
-      <div className="flex-1 overflow-y-auto" ref={scrollRef} onScroll={handleScroll}>
+      <div
+        className="flex-1 overflow-y-auto"
+        ref={scrollRef}
+        onScroll={handleScroll}
+      >
         {/* Pull to Refresh */}
         <div className="lg:hidden">
-          <div 
+          <div
             className="flex justify-center py-4"
             style={{ transform: `translateY(${isRefreshing ? '0' : '-100%'})` }}
           >
@@ -374,7 +300,9 @@ const CharacterGallery: React.FC<CharacterGalleryProps> = ({
               disabled={isRefreshing}
               className="flex items-center space-x-2 text-blue-600 disabled:opacity-50"
             >
-              <RefreshCw className={cn('w-4 h-4', isRefreshing && 'animate-spin')} />
+              <RefreshCw
+                className={cn('w-4 h-4', isRefreshing && 'animate-spin')}
+              />
               <span className="text-sm">Обновить</span>
             </button>
           </div>
@@ -393,6 +321,7 @@ const CharacterGallery: React.FC<CharacterGalleryProps> = ({
                   key={character.id}
                   character={character}
                   onSelect={onCharacterSelect}
+                  onViewProfile={onViewProfile}
                 />
               ))}
             </div>
@@ -408,6 +337,7 @@ const CharacterGallery: React.FC<CharacterGalleryProps> = ({
                   key={character.id}
                   character={character}
                   onSelect={onCharacterSelect}
+                  onViewProfile={onViewProfile}
                 />
               ))}
 
@@ -423,16 +353,15 @@ const CharacterGallery: React.FC<CharacterGalleryProps> = ({
               <div className="w-24 h-24 bg-gray-100 rounded-full flex items-center justify-center mb-6">
                 <Search className="w-10 h-10 text-gray-400" />
               </div>
-              
+
               <h3 className="text-lg font-semibold text-gray-900 mb-2">
                 Персонажи не найдены
               </h3>
-              
+
               <p className="text-gray-500 mb-6 max-w-sm">
-                {localFilters.search 
+                {localFilters.search
                   ? `Не найдено персонажей по запросу "${localFilters.search}"`
-                  : 'Попробуйте изменить фильтры или создайте своего персонажа'
-                }
+                  : 'Попробуйте изменить фильтры или создайте своего персонажа'}
               </p>
 
               <Button

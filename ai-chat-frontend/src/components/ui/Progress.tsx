@@ -14,17 +14,17 @@ export const Progress: React.FC<ProgressProps> = ({
   max = 100,
   className,
   indicatorClassName,
-  showValue = false
+  showValue = false,
 }) => {
   const percentage = Math.min(Math.max((value / max) * 100, 0), 100);
 
   return (
-    <div className={cn("relative", className)}>
+    <div className={cn('relative', className)}>
       <div className="w-full bg-gray-200 rounded-full h-2">
         <div
           className={cn(
-            "h-2 rounded-full transition-all duration-300 ease-in-out",
-            indicatorClassName || "bg-blue-500"
+            'h-2 rounded-full transition-all duration-300 ease-in-out',
+            indicatorClassName || 'bg-blue-500'
           )}
           style={{ width: `${percentage}%` }}
         />

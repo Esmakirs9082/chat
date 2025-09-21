@@ -1,0 +1,86 @@
+{
+  "version": 2,
+  "name": "ai-chat-frontend-staging",
+  "builds": [
+    {
+      "src": "package.json",
+      "use": "@vercel/static-build",
+      "config": {
+        "distDir": "dist"
+      }
+    }
+  ],
+  "routes": [
+    {
+      "src": "/assets/(.*)",
+      "dest": "/assets/$1",
+      "headers": {
+        "cache-control": "public, max-age=86400"
+      }
+    },
+    {
+      "src": "/(.*\\.(js|css|png|jpg|jpeg|gif|svg|woff|woff2|ttf|eot|webp|avif))",
+      "dest": "/$1",
+      "headers": {
+        "cache-control": "public, max-age=86400"
+      }
+    },
+    {
+      "src": "/(.*)",
+      "dest": "/index.html",
+      "headers": {
+        "cache-control": "no-cache, no-store, must-revalidate",
+        "X-Robots-Tag": "noindex, nofollow"
+      }
+    }
+  ],
+  "headers": [
+    {
+      "source": "/(.*)",
+      "headers": [
+        {
+          "key": "X-Content-Type-Options",
+          "value": "nosniff"
+        },
+        {
+          "key": "X-Frame-Options",
+          "value": "DENY"
+        },
+        {
+          "key": "X-XSS-Protection",
+          "value": "1; mode=block"
+        },
+        {
+          "key": "Referrer-Policy",
+          "value": "strict-origin-when-cross-origin"
+        },
+        {
+          "key": "X-Environment",
+          "value": "staging"
+        }
+      ]
+    }
+  ],
+  "env": {
+    "VITE_API_URL": "@staging-api-url",
+    "VITE_WS_URL": "@staging-ws-url",
+    "VITE_STRIPE_KEY": "@staging-stripe-key",
+    "VITE_APP_ENV": "staging",
+    "VITE_SENTRY_DSN": "@staging-sentry-dsn"
+  },
+  "build": {
+    "env": {
+      "NODE_ENV": "production"
+    }
+  },
+  "rewrites": [
+    {
+      "source": "/api/(.*)",
+      "destination": "https://api-staging.ai-chat.com/api/$1"
+    },
+    {
+      "source": "/ws",
+      "destination": "wss://ws-staging.ai-chat.com"
+    }
+  ]
+}

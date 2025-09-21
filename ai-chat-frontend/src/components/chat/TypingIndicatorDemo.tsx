@@ -1,5 +1,8 @@
 import React, { useState } from 'react';
-import TypingIndicator, { MultipleTypingIndicator, useTypingIndicator } from './TypingIndicator';
+import TypingIndicator, {
+  MultipleTypingIndicator,
+  useTypingIndicator,
+} from './TypingIndicator';
 import { Button } from '../ui';
 import { Character } from '../../types';
 
@@ -29,9 +32,7 @@ const demoCharacters: Character[] = [
     id: 'demo-character-2',
     name: 'Макс',
     avatar: undefined,
-    personality: [
-      { trait: 'романтичный', value: 4 },
-    ],
+    personality: [{ trait: 'романтичный', value: 4 }],
     description: 'Романтичный собеседник',
     isNsfw: true,
     isPublic: false,
@@ -45,9 +46,7 @@ const demoCharacters: Character[] = [
     id: 'demo-character-3',
     name: 'Софи',
     avatar: undefined,
-    personality: [
-      { trait: 'креативный', value: 5 },
-    ],
+    personality: [{ trait: 'креативный', value: 5 }],
     description: 'Творческая личность',
     isNsfw: false,
     isPublic: true,
@@ -64,9 +63,10 @@ const TypingIndicatorDemo: React.FC = () => {
   const [showInline, setShowInline] = useState(false);
   const [showMinimal, setShowMinimal] = useState(false);
   const [showMultiple, setShowMultiple] = useState(false);
-  
+
   // Демонстрация хука
-  const { isTyping, showTyping, hideTyping, toggleTyping } = useTypingIndicator(3000);
+  const { isTyping, showTyping, hideTyping, toggleTyping } =
+    useTypingIndicator(3000);
 
   return (
     <div className="max-w-2xl mx-auto p-8 space-y-8">
@@ -90,7 +90,7 @@ const TypingIndicatorDemo: React.FC = () => {
             {showBubble ? 'Скрыть' : 'Показать'}
           </Button>
         </div>
-        
+
         <div className="bg-gray-50 p-6 rounded-lg min-h-[100px]">
           <TypingIndicator
             characterName={demoCharacter.name}
@@ -112,7 +112,7 @@ const TypingIndicatorDemo: React.FC = () => {
             {showInline ? 'Скрыть' : 'Показать'}
           </Button>
         </div>
-        
+
         <div className="bg-gray-50 p-6 rounded-lg">
           <TypingIndicator
             characterName={demoCharacter.name}
@@ -134,7 +134,7 @@ const TypingIndicatorDemo: React.FC = () => {
             {showMinimal ? 'Скрыть' : 'Показать'}
           </Button>
         </div>
-        
+
         <div className="bg-gray-50 p-6 rounded-lg">
           <TypingIndicator
             characterName={demoCharacter.name}
@@ -155,13 +155,13 @@ const TypingIndicatorDemo: React.FC = () => {
             {showMultiple ? 'Скрыть' : 'Показать'}
           </Button>
         </div>
-        
+
         <div className="bg-gray-50 p-6 rounded-lg">
           <MultipleTypingIndicator
-            typingUsers={demoCharacters.map(char => ({
+            typingUsers={demoCharacters.map((char) => ({
               id: char.id,
               name: char.name,
-              avatar: char.avatar
+              avatar: char.avatar,
             }))}
             maxVisible={2}
             className={showMultiple ? '' : 'hidden'}
@@ -185,7 +185,7 @@ const TypingIndicatorDemo: React.FC = () => {
             </Button>
           </div>
         </div>
-        
+
         <div className="bg-gray-50 p-6 rounded-lg">
           {isTyping && (
             <TypingIndicator
@@ -208,7 +208,7 @@ const TypingIndicatorDemo: React.FC = () => {
         <h2 className="text-xl font-semibold">Примеры использования</h2>
         <div className="bg-gray-900 text-gray-100 p-6 rounded-lg overflow-x-auto">
           <pre className="text-sm">
-{`// Базовое использование
+            {`// Базовое использование
 <TypingIndicator
   character={character}
   isVisible={isTyping}

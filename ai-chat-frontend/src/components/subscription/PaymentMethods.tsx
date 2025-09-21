@@ -7,7 +7,7 @@ import {
   deletePaymentMethod,
   setDefaultPaymentMethod,
   type PaymentMethod,
-  type PaymentMethodData
+  type PaymentMethodData,
 } from '../../services/subscriptionApi';
 import { cn } from '../../utils';
 
@@ -18,7 +18,7 @@ interface PaymentMethodsProps {
 
 export const PaymentMethods: React.FC<PaymentMethodsProps> = ({
   onPaymentMethodUpdate,
-  className
+  className,
 }) => {
   const [methods, setMethods] = useState<PaymentMethod[]>([]);
   const [loading, setLoading] = useState(true);
@@ -81,19 +81,17 @@ export const PaymentMethods: React.FC<PaymentMethodsProps> = ({
 
   if (loading) {
     return (
-      <div className={cn("flex justify-center items-center py-8", className)}>
+      <div className={cn('flex justify-center items-center py-8', className)}>
         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-purple-600"></div>
       </div>
     );
   }
 
   return (
-    <div className={cn("space-y-4", className)}>
+    <div className={cn('space-y-4', className)}>
       {/* Header */}
       <div className="flex items-center justify-between">
-        <h3 className="text-lg font-medium text-gray-900">
-          Методы оплаты
-        </h3>
+        <h3 className="text-lg font-medium text-gray-900">Методы оплаты</h3>
         <Button
           onClick={() => setShowAddModal(true)}
           size="sm"
@@ -128,19 +126,23 @@ export const PaymentMethods: React.FC<PaymentMethodsProps> = ({
             <div
               key={method.id}
               className={cn(
-                "border rounded-lg p-4 transition-all duration-200",
-                method.isDefault 
-                  ? "border-purple-500 bg-purple-50" 
-                  : "border-gray-200 hover:border-gray-300"
+                'border rounded-lg p-4 transition-all duration-200',
+                method.isDefault
+                  ? 'border-purple-500 bg-purple-50'
+                  : 'border-gray-200 hover:border-gray-300'
               )}
             >
               <div className="flex items-center justify-between">
                 <div className="flex items-center space-x-3">
                   {/* Card Icon */}
-                  <div className={cn(
-                    "flex items-center justify-center w-10 h-10 rounded-lg",
-                    method.isDefault ? "bg-purple-100 text-purple-600" : "bg-gray-100 text-gray-600"
-                  )}>
+                  <div
+                    className={cn(
+                      'flex items-center justify-center w-10 h-10 rounded-lg',
+                      method.isDefault
+                        ? 'bg-purple-100 text-purple-600'
+                        : 'bg-gray-100 text-gray-600'
+                    )}
+                  >
                     {method.card ? (
                       getCardBrandIcon(method.card.brand)
                     ) : (
@@ -175,7 +177,7 @@ export const PaymentMethods: React.FC<PaymentMethodsProps> = ({
                         </>
                       )}
                     </div>
-                    
+
                     {method.isDefault && (
                       <div className="flex items-center mt-1">
                         <Check className="h-3 w-3 text-green-500 mr-1" />
@@ -199,7 +201,7 @@ export const PaymentMethods: React.FC<PaymentMethodsProps> = ({
                       По умолчанию
                     </Button>
                   )}
-                  
+
                   <Button
                     size="sm"
                     variant="ghost"
@@ -235,7 +237,7 @@ interface AddPaymentMethodModalProps {
 const AddPaymentMethodModal: React.FC<AddPaymentMethodModalProps> = ({
   open,
   onClose,
-  onSuccess
+  onSuccess,
 }) => {
   const [formData, setFormData] = useState({
     number: '',
@@ -243,7 +245,7 @@ const AddPaymentMethodModal: React.FC<AddPaymentMethodModalProps> = ({
     expYear: '',
     cvc: '',
     name: '',
-    email: ''
+    email: '',
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -260,18 +262,18 @@ const AddPaymentMethodModal: React.FC<AddPaymentMethodModalProps> = ({
           number: formData.number,
           expMonth: parseInt(formData.expMonth),
           expYear: parseInt(formData.expYear),
-          cvc: formData.cvc
+          cvc: formData.cvc,
         },
         billingDetails: {
           name: formData.name,
-          email: formData.email
-        }
+          email: formData.email,
+        },
       };
 
       await addPaymentMethod(paymentMethodData);
       onSuccess();
       onClose();
-      
+
       // Reset form
       setFormData({
         number: '',
@@ -279,7 +281,7 @@ const AddPaymentMethodModal: React.FC<AddPaymentMethodModalProps> = ({
         expYear: '',
         cvc: '',
         name: '',
-        email: ''
+        email: '',
       });
     } catch (err: any) {
       setError(err.message || 'Ошибка добавления карты');
@@ -305,7 +307,9 @@ const AddPaymentMethodModal: React.FC<AddPaymentMethodModalProps> = ({
             type="text"
             placeholder="1234 5678 9012 3456"
             value={formData.number}
-            onChange={(e) => setFormData({ ...formData, number: e.target.value })}
+            onChange={(e) =>
+              setFormData({ ...formData, number: e.target.value })
+            }
             required
           />
         </div>
@@ -319,7 +323,9 @@ const AddPaymentMethodModal: React.FC<AddPaymentMethodModalProps> = ({
               type="text"
               placeholder="12"
               value={formData.expMonth}
-              onChange={(e) => setFormData({ ...formData, expMonth: e.target.value })}
+              onChange={(e) =>
+                setFormData({ ...formData, expMonth: e.target.value })
+              }
               required
             />
           </div>
@@ -331,7 +337,9 @@ const AddPaymentMethodModal: React.FC<AddPaymentMethodModalProps> = ({
               type="text"
               placeholder="2025"
               value={formData.expYear}
-              onChange={(e) => setFormData({ ...formData, expYear: e.target.value })}
+              onChange={(e) =>
+                setFormData({ ...formData, expYear: e.target.value })
+              }
               required
             />
           </div>
@@ -343,7 +351,9 @@ const AddPaymentMethodModal: React.FC<AddPaymentMethodModalProps> = ({
               type="text"
               placeholder="123"
               value={formData.cvc}
-              onChange={(e) => setFormData({ ...formData, cvc: e.target.value })}
+              onChange={(e) =>
+                setFormData({ ...formData, cvc: e.target.value })
+              }
               required
             />
           </div>
@@ -370,7 +380,9 @@ const AddPaymentMethodModal: React.FC<AddPaymentMethodModalProps> = ({
             type="email"
             placeholder="ivan@example.com"
             value={formData.email}
-            onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+            onChange={(e) =>
+              setFormData({ ...formData, email: e.target.value })
+            }
             required
           />
         </div>
@@ -384,11 +396,7 @@ const AddPaymentMethodModal: React.FC<AddPaymentMethodModalProps> = ({
           >
             Отмена
           </Button>
-          <Button
-            type="submit"
-            loading={loading}
-            disabled={loading}
-          >
+          <Button type="submit" loading={loading} disabled={loading}>
             Добавить карту
           </Button>
         </div>

@@ -1,5 +1,12 @@
 import React, { useEffect, useState, useRef, useCallback } from 'react';
-import { AlertTriangle, Settings, MoreVertical, WifiOff, Wifi, Loader2 } from 'lucide-react';
+import {
+  AlertTriangle,
+  Settings,
+  MoreVertical,
+  WifiOff,
+  Wifi,
+  Loader2,
+} from 'lucide-react';
 import { Avatar, Badge, Button } from '../ui';
 import MessageList from './MessageList';
 import MessageInput from './MessageInput';
@@ -15,48 +22,65 @@ interface ChatInterfaceProps {
 
 const ConnectionStatus = ({ status }: { status: string }) => (
   <div className="flex items-center gap-1 text-xs text-gray-500 ml-2">
-    {status === 'connecting' && <Loader2 className="animate-spin w-4 h-4" />} 
-    {status === 'connected' && <Wifi className="w-4 h-4 text-green-500" />} 
-    {status === 'disconnected' && <WifiOff className="w-4 h-4 text-red-500" />} 
-    <span>{status === 'connecting' ? 'Подключение...' : status === 'connected' ? 'Онлайн' : 'Оффлайн'}</span>
+    {status === 'connecting' && <Loader2 className="animate-spin w-4 h-4" />}
+    {status === 'connected' && <Wifi className="w-4 h-4 text-green-500" />}
+    {status === 'disconnected' && <WifiOff className="w-4 h-4 text-red-500" />}
+    <span>
+      {status === 'connecting'
+        ? 'Подключение...'
+        : status === 'connected'
+          ? 'Онлайн'
+          : 'Оффлайн'}
+    </span>
   </div>
 );
 
 const NsfwOverlay = ({ onEnableNSFW, onChooseCharacter }: any) => (
   <div className="absolute inset-0 flex items-center justify-center backdrop-blur-sm z-50">
     <div className="bg-white dark:bg-zinc-900 rounded-xl shadow-xl p-8 text-center max-w-xs mx-auto">
-      <div className="text-xl font-bold mb-2">Этот персонаж содержит контент 18+</div>
-      <div className="text-sm mb-6 text-gray-600">Включите NSFW в настройках, чтобы продолжить</div>
-      <button className="w-full mb-2 py-2 rounded bg-purple-600 text-white font-semibold" onClick={onEnableNSFW}>Включить в настройках</button>
-      <button className="w-full py-2 rounded bg-gray-200 dark:bg-zinc-800 text-gray-700 dark:text-gray-200 font-semibold" onClick={onChooseCharacter}>Выбрать другого персонажа</button>
+      <div className="text-xl font-bold mb-2">
+        Этот персонаж содержит контент 18+
+      </div>
+      <div className="text-sm mb-6 text-gray-600">
+        Включите NSFW в настройках, чтобы продолжить
+      </div>
+      <button
+        className="w-full mb-2 py-2 rounded bg-purple-600 text-white font-semibold"
+        onClick={onEnableNSFW}
+      >
+        Включить в настройках
+      </button>
+      <button
+        className="w-full py-2 rounded bg-gray-200 dark:bg-zinc-800 text-gray-700 dark:text-gray-200 font-semibold"
+        onClick={onChooseCharacter}
+      >
+        Выбрать другого персонажа
+      </button>
     </div>
   </div>
 );
 
-const ChatInterface: React.FC<ChatInterfaceProps> = ({ characterId, className }) => {
-  const { 
-    activeChat, 
-    sendMessage, 
-    typingUsers, 
-    createChat 
-  } = useChatStore();
-  
-  const { 
-    characters, 
-    selectedCharacter, 
-    setSelectedCharacter,
-    showNsfw 
-  } = useCharacterStore();
-  
+const ChatInterface: React.FC<ChatInterfaceProps> = ({
+  characterId,
+  className,
+}) => {
+  const { activeChat, sendMessage, typingUsers, createChat } = useChatStore();
+
+  const { characters, selectedCharacter, setSelectedCharacter, showNsfw } =
+    useCharacterStore();
+
   const { nsfwEnabled, toggleNSFW } = useSettingsStore();
   const [showNsfwWarning, setShowNsfwWarning] = useState(false);
-  const [connectionStatus, setConnectionStatus] = useState<'connecting'|'connected'|'disconnected'>('disconnected');
+  const [connectionStatus, setConnectionStatus] = useState<
+    'connecting' | 'connected' | 'disconnected'
+  >('disconnected');
   const wsRef = useRef<WebSocket | null>(null);
   const messageInputRef = useRef<any>(null);
 
   // Найти персонажа
-  const character = characters.find(c => c.id === characterId) || selectedCharacter;
-  
+  const character =
+    characters.find((c) => c.id === characterId) || selectedCharacter;
+
   // Проверка NSFW предупреждения
   useEffect(() => {
     if (character?.isNsfw && !showNsfw) {
@@ -65,7 +89,7 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({ characterId, className })
       setShowNsfwWarning(false);
     }
   }, [character?.isNsfw, showNsfw]);
-  
+
   // Создание чата если его нет
   useEffect(() => {
     if (character && !activeChat) {
@@ -75,7 +99,7 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({ characterId, className })
       setSelectedCharacter(character);
     }
   }, [character, activeChat, createChat, setSelectedCharacter]);
-  
+
   // WebSocket подключение
   useEffect(() => {
     if (!activeChat?.id) return;
@@ -121,7 +145,7 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({ characterId, className })
       </div>
     );
   }
-  
+
   // NSFW Warning Modal
   if (showNsfwWarning) {
     return (
@@ -133,11 +157,11 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({ characterId, className })
               Контент для взрослых (18+)
             </h3>
             <p className="text-gray-600">
-              Этот персонаж содержит контент для взрослых. 
-              Убедитесь, что вам исполнилось 18 лет.
+              Этот персонаж содержит контент для взрослых. Убедитесь, что вам
+              исполнилось 18 лет.
             </p>
           </div>
-          
+
           <div className="space-y-3">
             <Button
               variant="primary"
@@ -146,7 +170,7 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({ characterId, className })
             >
               Мне есть 18 лет, продолжить
             </Button>
-            
+
             <Button
               variant="secondary"
               className="w-full"
@@ -159,7 +183,7 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({ characterId, className })
       </div>
     );
   }
-  
+
   if (showNsfwOverlay) {
     return (
       <NsfwOverlay
@@ -168,11 +192,11 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({ characterId, className })
       />
     );
   }
-  
+
   const isCharacterTyping = typingUsers.includes(characterId);
-  
+
   return (
-    <div className={cn("flex flex-col h-full bg-gray-50 relative", className)}>
+    <div className={cn('flex flex-col h-full bg-gray-50 relative', className)}>
       {/* Character Header */}
       <div className="bg-white border-b border-gray-200 px-4 py-3 flex items-center justify-between">
         <div className="flex items-center space-x-3">
@@ -182,7 +206,7 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({ characterId, className })
             size="md"
             showOnlineStatus={true}
           />
-          
+
           <div className="flex-1 min-w-0">
             <div className="flex items-center space-x-2">
               <h2 className="font-semibold text-gray-900 truncate">
@@ -194,19 +218,17 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({ characterId, className })
                 </Badge>
               )}
             </div>
-            
+
             <p className="text-sm text-gray-500 truncate">
               {character.description}
             </p>
-            
+
             {isCharacterTyping && (
-              <p className="text-xs text-blue-600 mt-1">
-                Печатает...
-              </p>
+              <p className="text-xs text-blue-600 mt-1">Печатает...</p>
             )}
           </div>
         </div>
-        
+
         <div className="flex items-center space-x-2">
           <button
             className="p-2 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-full"
@@ -214,18 +236,18 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({ characterId, className })
           >
             <Settings className="h-5 w-5" />
           </button>
-          
+
           <button
             className="p-2 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-full"
             title="Дополнительно"
           >
             <MoreVertical className="h-5 w-5" />
           </button>
-          
+
           <ConnectionStatus status={connectionStatus} />
         </div>
       </div>
-      
+
       {/* Messages List */}
       <MessageList
         messages={activeChat?.messages || []}
@@ -245,7 +267,7 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({ characterId, className })
           console.log('Copied:', content);
         }}
       />
-      
+
       {/* Message Input */}
       <MessageInput
         ref={messageInputRef}

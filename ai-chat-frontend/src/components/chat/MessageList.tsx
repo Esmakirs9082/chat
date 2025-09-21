@@ -22,7 +22,9 @@ interface MessageListProps {
 const NewMessagesDivider = () => (
   <div className="flex items-center my-4">
     <div className="flex-1 h-px bg-gray-300" />
-    <span className="mx-2 text-xs text-gray-500 bg-white px-2 rounded">Новые сообщения</span>
+    <span className="mx-2 text-xs text-gray-500 bg-white px-2 rounded">
+      Новые сообщения
+    </span>
     <div className="flex-1 h-px bg-gray-300" />
   </div>
 );

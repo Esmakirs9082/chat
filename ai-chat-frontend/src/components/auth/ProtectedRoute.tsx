@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState, ReactNode } from 'react';
 import { useAuthStore } from '../../stores/authStore';
 import { useSubscriptionStore } from '../../stores/subscriptionStore';
@@ -10,9 +9,20 @@ const AppLoader: React.FC = () => (
   <div className="flex flex-col items-center justify-center min-h-screen bg-gray-900 text-white">
     <div className="mb-6 animate-spin">
       {/* SVG логотип */}
-      <svg width="48" height="48" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <svg
+        width="48"
+        height="48"
+        viewBox="0 0 48 48"
+        fill="none"
+        xmlns="http://www.w3.org/2000/svg"
+      >
         <circle cx="24" cy="24" r="20" stroke="#6366F1" strokeWidth="4" />
-        <path d="M24 8a16 16 0 1 1-16 16" stroke="#6366F1" strokeWidth="4" strokeLinecap="round" />
+        <path
+          d="M24 8a16 16 0 1 1-16 16"
+          stroke="#6366F1"
+          strokeWidth="4"
+          strokeLinecap="round"
+        />
       </svg>
     </div>
     <div className="text-lg font-medium">Проверка авторизации...</div>
@@ -49,12 +59,19 @@ interface ProtectedRouteProps {
   requirePremium?: boolean;
 }
 
-const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children, fallback, requirePremium }) => {
+const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
+  children,
+  fallback,
+  requirePremium,
+}) => {
   const { isAuthenticated, user } = useAuthStore();
   const authLoading = false; // TODO: если нужен лоадер, добавить в стор
   const [showLogin, setShowLogin] = useState(false);
   const [showSubscription, setShowSubscription] = useState(false);
-  const { isPremium, loading: premiumLoading } = useCachedPremium(user?.id, requirePremium);
+  const { isPremium, loading: premiumLoading } = useCachedPremium(
+    user?.id,
+    requirePremium
+  );
 
   // Если идет загрузка авторизации или подписки
   if (authLoading || (requirePremium && premiumLoading)) {
@@ -63,21 +80,37 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children, fallback, req
 
   // Не авторизован — показываем LoginModal
   if (!isAuthenticated) {
-    return <Modal isOpen={true} onClose={() => setShowLogin(false)}>
-      <LoginModal isOpen={true} onClose={() => setShowLogin(false)} onSwitchToRegister={() => {}} onForgotPassword={() => {}} />
-    </Modal>;
+    return (
+      <Modal isOpen={true} onClose={() => setShowLogin(false)}>
+        <LoginModal
+          isOpen={true}
+          onClose={() => setShowLogin(false)}
+          onSwitchToRegister={() => {}}
+          onForgotPassword={() => {}}
+        />
+      </Modal>
+    );
   }
 
   // Требуется премиум, но нет подписки — показываем SubscriptionModal
   if (requirePremium && isPremium === false) {
-  return <Modal isOpen={true} onClose={() => setShowSubscription(false)}>
-      {/* TODO: заменить на реальный SubscriptionModal */}
-      <div className="p-8 text-center">
-        <h2 className="text-xl font-bold mb-4">Требуется премиум-подписка</h2>
-        <p className="mb-6">Для доступа к этому разделу нужна активная подписка.</p>
-        <a href="/profile/subscription" className="inline-block px-4 py-2 bg-indigo-600 text-white rounded hover:bg-indigo-700">Оформить подписку</a>
-      </div>
-    </Modal>;
+    return (
+      <Modal isOpen={true} onClose={() => setShowSubscription(false)}>
+        {/* TODO: заменить на реальный SubscriptionModal */}
+        <div className="p-8 text-center">
+          <h2 className="text-xl font-bold mb-4">Требуется премиум-подписка</h2>
+          <p className="mb-6">
+            Для доступа к этому разделу нужна активная подписка.
+          </p>
+          <a
+            href="/profile/subscription"
+            className="inline-block px-4 py-2 bg-indigo-600 text-white rounded hover:bg-indigo-700"
+          >
+            Оформить подписку
+          </a>
+        </div>
+      </Modal>
+    );
   }
 
   // Всё ок — рендерим детей (nested routes поддерживаются)

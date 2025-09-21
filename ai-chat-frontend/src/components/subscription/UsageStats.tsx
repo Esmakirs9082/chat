@@ -1,11 +1,18 @@
 import React, { useState, useEffect } from 'react';
-import { BarChart3, MessageCircle, Users, HardDrive, TrendingUp, AlertTriangle } from 'lucide-react';
+import {
+  BarChart3,
+  MessageCircle,
+  Users,
+  HardDrive,
+  TrendingUp,
+  AlertTriangle,
+} from 'lucide-react';
 import { Button, Progress } from '../ui';
-import { 
-  getUsageStats, 
+import {
+  getUsageStats,
   shouldUpgrade,
   type UsageStats,
-  type Subscription 
+  type Subscription,
 } from '../../services/subscriptionApi';
 import { cn } from '../../utils';
 
@@ -18,7 +25,7 @@ interface UsageStatsProps {
 export const UsageStatsComponent: React.FC<UsageStatsProps> = ({
   subscription,
   onUpgradeClick,
-  className
+  className,
 }) => {
   const [usage, setUsage] = useState<UsageStats | null>(null);
   const [loading, setLoading] = useState(true);
@@ -56,7 +63,7 @@ export const UsageStatsComponent: React.FC<UsageStatsProps> = ({
 
   if (loading) {
     return (
-      <div className={cn("flex justify-center items-center py-8", className)}>
+      <div className={cn('flex justify-center items-center py-8', className)}>
         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-purple-600"></div>
       </div>
     );
@@ -64,7 +71,7 @@ export const UsageStatsComponent: React.FC<UsageStatsProps> = ({
 
   if (error) {
     return (
-      <div className={cn("text-center py-8", className)}>
+      <div className={cn('text-center py-8', className)}>
         <p className="text-red-600 mb-4">{error}</p>
         <Button onClick={loadUsageStats} variant="outline">
           Попробовать снова
@@ -81,17 +88,14 @@ export const UsageStatsComponent: React.FC<UsageStatsProps> = ({
   const isFreePlan = !subscription || subscription.plan.price === 0;
 
   return (
-    <div className={cn("space-y-6", className)}>
+    <div className={cn('space-y-6', className)}>
       {/* Header */}
       <div className="flex items-center justify-between">
         <h3 className="text-lg font-medium text-gray-900">
           Статистика использования
         </h3>
         {upgradeInfo.shouldUpgrade && onUpgradeClick && (
-          <Button 
-            onClick={onUpgradeClick}
-            className="flex items-center gap-2"
-          >
+          <Button onClick={onUpgradeClick} className="flex items-center gap-2">
             <TrendingUp className="h-4 w-4" />
             Улучшить план
           </Button>
@@ -131,22 +135,28 @@ export const UsageStatsComponent: React.FC<UsageStatsProps> = ({
               </span>
             </div>
           </div>
-          
+
           <div className="space-y-2">
             <div className="flex items-baseline justify-between">
               <span className="text-2xl font-bold text-gray-900">
                 {usage.chatsToday}
               </span>
               <span className="text-sm text-gray-500">
-                из {usage.limits.maxChatsPerDay === -1 ? '∞' : usage.limits.maxChatsPerDay}
+                из{' '}
+                {usage.limits.maxChatsPerDay === -1
+                  ? '∞'
+                  : usage.limits.maxChatsPerDay}
               </span>
             </div>
-            
+
             {usage.limits.maxChatsPerDay > 0 && (
               <Progress
                 value={(usage.chatsToday / usage.limits.maxChatsPerDay) * 100}
                 className="h-2"
-                indicatorClassName={getProgressColor(usage.chatsToday, usage.limits.maxChatsPerDay)}
+                indicatorClassName={getProgressColor(
+                  usage.chatsToday,
+                  usage.limits.maxChatsPerDay
+                )}
               />
             )}
           </div>
@@ -162,22 +172,31 @@ export const UsageStatsComponent: React.FC<UsageStatsProps> = ({
               </span>
             </div>
           </div>
-          
+
           <div className="space-y-2">
             <div className="flex items-baseline justify-between">
               <span className="text-2xl font-bold text-gray-900">
                 {usage.messagesThisMonth.toLocaleString()}
               </span>
               <span className="text-sm text-gray-500">
-                из {usage.limits.maxMessagesPerMonth === -1 ? '∞' : usage.limits.maxMessagesPerMonth.toLocaleString()}
+                из{' '}
+                {usage.limits.maxMessagesPerMonth === -1
+                  ? '∞'
+                  : usage.limits.maxMessagesPerMonth.toLocaleString()}
               </span>
             </div>
-            
+
             {usage.limits.maxMessagesPerMonth > 0 && (
               <Progress
-                value={(usage.messagesThisMonth / usage.limits.maxMessagesPerMonth) * 100}
+                value={
+                  (usage.messagesThisMonth / usage.limits.maxMessagesPerMonth) *
+                  100
+                }
                 className="h-2"
-                indicatorClassName={getProgressColor(usage.messagesThisMonth, usage.limits.maxMessagesPerMonth)}
+                indicatorClassName={getProgressColor(
+                  usage.messagesThisMonth,
+                  usage.limits.maxMessagesPerMonth
+                )}
               />
             )}
           </div>
@@ -193,22 +212,30 @@ export const UsageStatsComponent: React.FC<UsageStatsProps> = ({
               </span>
             </div>
           </div>
-          
+
           <div className="space-y-2">
             <div className="flex items-baseline justify-between">
               <span className="text-2xl font-bold text-gray-900">
                 {usage.charactersCreated}
               </span>
               <span className="text-sm text-gray-500">
-                из {usage.limits.maxCharacters === -1 ? '∞' : usage.limits.maxCharacters}
+                из{' '}
+                {usage.limits.maxCharacters === -1
+                  ? '∞'
+                  : usage.limits.maxCharacters}
               </span>
             </div>
-            
+
             {usage.limits.maxCharacters > 0 && (
               <Progress
-                value={(usage.charactersCreated / usage.limits.maxCharacters) * 100}
+                value={
+                  (usage.charactersCreated / usage.limits.maxCharacters) * 100
+                }
                 className="h-2"
-                indicatorClassName={getProgressColor(usage.charactersCreated, usage.limits.maxCharacters)}
+                indicatorClassName={getProgressColor(
+                  usage.charactersCreated,
+                  usage.limits.maxCharacters
+                )}
               />
             )}
           </div>
@@ -224,22 +251,28 @@ export const UsageStatsComponent: React.FC<UsageStatsProps> = ({
               </span>
             </div>
           </div>
-          
+
           <div className="space-y-2">
             <div className="flex items-baseline justify-between">
               <span className="text-2xl font-bold text-gray-900">
                 {formatBytes(usage.storageUsed * 1024 * 1024)}
               </span>
               <span className="text-sm text-gray-500">
-                из {usage.limits.maxStorageMB === -1 ? '∞' : formatBytes(usage.limits.maxStorageMB * 1024 * 1024)}
+                из{' '}
+                {usage.limits.maxStorageMB === -1
+                  ? '∞'
+                  : formatBytes(usage.limits.maxStorageMB * 1024 * 1024)}
               </span>
             </div>
-            
+
             {usage.limits.maxStorageMB > 0 && (
               <Progress
                 value={(usage.storageUsed / usage.limits.maxStorageMB) * 100}
                 className="h-2"
-                indicatorClassName={getProgressColor(usage.storageUsed, usage.limits.maxStorageMB)}
+                indicatorClassName={getProgressColor(
+                  usage.storageUsed,
+                  usage.limits.maxStorageMB
+                )}
               />
             )}
           </div>
@@ -257,21 +290,15 @@ export const UsageStatsComponent: React.FC<UsageStatsProps> = ({
               {new Date(usage.resetDate).toLocaleDateString('ru-RU', {
                 day: 'numeric',
                 month: 'long',
-                year: 'numeric'
+                year: 'numeric',
               })}
             </p>
           </div>
-          
+
           {isFreePlan && (
             <div className="text-right">
-              <p className="text-sm text-gray-600">
-                Базовый план
-              </p>
-              <Button
-                size="sm"
-                onClick={onUpgradeClick}
-                className="mt-1"
-              >
+              <p className="text-sm text-gray-600">Базовый план</p>
+              <Button size="sm" onClick={onUpgradeClick} className="mt-1">
                 Улучшить
               </Button>
             </div>
@@ -285,54 +312,104 @@ export const UsageStatsComponent: React.FC<UsageStatsProps> = ({
           <h4 className="text-sm font-medium text-gray-900 mb-3">
             Возможности вашего плана: {subscription.plan.displayName}
           </h4>
-          
+
           <div className="grid grid-cols-2 md:grid-cols-3 gap-4 text-sm">
             <div className="flex items-center">
-              <div className={cn(
-                "w-2 h-2 rounded-full mr-2",
-                subscription.plan.features.nsfwContent ? "bg-green-500" : "bg-gray-300"
-              )} />
-              <span className={subscription.plan.features.nsfwContent ? "text-gray-900" : "text-gray-500"}>
+              <div
+                className={cn(
+                  'w-2 h-2 rounded-full mr-2',
+                  subscription.plan.features.nsfwContent
+                    ? 'bg-green-500'
+                    : 'bg-gray-300'
+                )}
+              />
+              <span
+                className={
+                  subscription.plan.features.nsfwContent
+                    ? 'text-gray-900'
+                    : 'text-gray-500'
+                }
+              >
                 NSFW контент
               </span>
             </div>
-            
+
             <div className="flex items-center">
-              <div className={cn(
-                "w-2 h-2 rounded-full mr-2",
-                subscription.plan.features.customCharacters ? "bg-green-500" : "bg-gray-300"
-              )} />
-              <span className={subscription.plan.features.customCharacters ? "text-gray-900" : "text-gray-500"}>
+              <div
+                className={cn(
+                  'w-2 h-2 rounded-full mr-2',
+                  subscription.plan.features.customCharacters
+                    ? 'bg-green-500'
+                    : 'bg-gray-300'
+                )}
+              />
+              <span
+                className={
+                  subscription.plan.features.customCharacters
+                    ? 'text-gray-900'
+                    : 'text-gray-500'
+                }
+              >
                 Свои персонажи
               </span>
             </div>
-            
+
             <div className="flex items-center">
-              <div className={cn(
-                "w-2 h-2 rounded-full mr-2",
-                subscription.plan.features.voiceMessages ? "bg-green-500" : "bg-gray-300"
-              )} />
-              <span className={subscription.plan.features.voiceMessages ? "text-gray-900" : "text-gray-500"}>
+              <div
+                className={cn(
+                  'w-2 h-2 rounded-full mr-2',
+                  subscription.plan.features.voiceMessages
+                    ? 'bg-green-500'
+                    : 'bg-gray-300'
+                )}
+              />
+              <span
+                className={
+                  subscription.plan.features.voiceMessages
+                    ? 'text-gray-900'
+                    : 'text-gray-500'
+                }
+              >
                 Голосовые сообщения
               </span>
             </div>
-            
+
             <div className="flex items-center">
-              <div className={cn(
-                "w-2 h-2 rounded-full mr-2",
-                subscription.plan.features.imageGeneration ? "bg-green-500" : "bg-gray-300"
-              )} />
-              <span className={subscription.plan.features.imageGeneration ? "text-gray-900" : "text-gray-500"}>
+              <div
+                className={cn(
+                  'w-2 h-2 rounded-full mr-2',
+                  subscription.plan.features.imageGeneration
+                    ? 'bg-green-500'
+                    : 'bg-gray-300'
+                )}
+              />
+              <span
+                className={
+                  subscription.plan.features.imageGeneration
+                    ? 'text-gray-900'
+                    : 'text-gray-500'
+                }
+              >
                 Генерация изображений
               </span>
             </div>
-            
+
             <div className="flex items-center">
-              <div className={cn(
-                "w-2 h-2 rounded-full mr-2",
-                subscription.plan.features.prioritySupport ? "bg-green-500" : "bg-gray-300"
-              )} />
-              <span className={subscription.plan.features.prioritySupport ? "text-gray-900" : "text-gray-500"}>
+              <div
+                className={cn(
+                  'w-2 h-2 rounded-full mr-2',
+                  subscription.plan.features.prioritySupport
+                    ? 'bg-green-500'
+                    : 'bg-gray-300'
+                )}
+              />
+              <span
+                className={
+                  subscription.plan.features.prioritySupport
+                    ? 'text-gray-900'
+                    : 'text-gray-500'
+                }
+              >
                 Приоритетная поддержка
               </span>
             </div>

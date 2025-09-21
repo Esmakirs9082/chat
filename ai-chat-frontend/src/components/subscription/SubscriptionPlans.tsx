@@ -1,13 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { Check, Crown, Zap, Star, CreditCard } from 'lucide-react';
 import { Button } from '../ui';
-import { 
-  getPlans, 
-  getSubscription, 
-  subscribe, 
+import {
+  getPlans,
+  getSubscription,
+  subscribe,
   formatPrice,
   type SubscriptionPlan,
-  type Subscription 
+  type Subscription,
 } from '../../services/subscriptionApi';
 import { cn } from '../../utils';
 
@@ -20,10 +20,11 @@ interface SubscriptionPlansProps {
 export const SubscriptionPlans: React.FC<SubscriptionPlansProps> = ({
   onPlanSelected,
   onSubscriptionUpdate,
-  className
+  className,
 }) => {
   const [plans, setPlans] = useState<SubscriptionPlan[]>([]);
-  const [currentSubscription, setCurrentSubscription] = useState<Subscription | null>(null);
+  const [currentSubscription, setCurrentSubscription] =
+    useState<Subscription | null>(null);
   const [loading, setLoading] = useState(true);
   const [subscribing, setSubscribing] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -37,7 +38,7 @@ export const SubscriptionPlans: React.FC<SubscriptionPlansProps> = ({
       setLoading(true);
       const [plansData, subscriptionData] = await Promise.all([
         getPlans(),
-        getSubscription()
+        getSubscription(),
       ]);
       setPlans(plansData);
       setCurrentSubscription(subscriptionData);
@@ -53,14 +54,14 @@ export const SubscriptionPlans: React.FC<SubscriptionPlansProps> = ({
     try {
       setSubscribing(planId);
       setError(null);
-      
+
       const subscription = await subscribe(planId, paymentMethodId);
       setCurrentSubscription(subscription);
-      
+
       if (onSubscriptionUpdate) {
         onSubscriptionUpdate(subscription);
       }
-      
+
       if (onPlanSelected) {
         onPlanSelected(planId);
       }
@@ -80,7 +81,10 @@ export const SubscriptionPlans: React.FC<SubscriptionPlansProps> = ({
   };
 
   const isCurrentPlan = (planId: string) => {
-    return currentSubscription?.planId === planId && currentSubscription?.status === 'active';
+    return (
+      currentSubscription?.planId === planId &&
+      currentSubscription?.status === 'active'
+    );
   };
 
   const getButtonText = (plan: SubscriptionPlan) => {
@@ -104,7 +108,7 @@ export const SubscriptionPlans: React.FC<SubscriptionPlansProps> = ({
 
   if (loading) {
     return (
-      <div className={cn("flex justify-center items-center py-8", className)}>
+      <div className={cn('flex justify-center items-center py-8', className)}>
         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-purple-600"></div>
       </div>
     );
@@ -112,7 +116,7 @@ export const SubscriptionPlans: React.FC<SubscriptionPlansProps> = ({
 
   if (error) {
     return (
-      <div className={cn("text-center py-8", className)}>
+      <div className={cn('text-center py-8', className)}>
         <p className="text-red-600 mb-4">{error}</p>
         <Button onClick={loadData} variant="outline">
           Попробовать снова
@@ -122,7 +126,7 @@ export const SubscriptionPlans: React.FC<SubscriptionPlansProps> = ({
   }
 
   return (
-    <div className={cn("space-y-6", className)}>
+    <div className={cn('space-y-6', className)}>
       {/* Header */}
       <div className="text-center">
         <h2 className="text-2xl font-bold text-gray-900 mb-2">
@@ -144,10 +148,12 @@ export const SubscriptionPlans: React.FC<SubscriptionPlansProps> = ({
             <div
               key={plan.id}
               className={cn(
-                "relative bg-white rounded-lg border-2 p-6 transition-all duration-200",
-                isActive && "border-green-500 bg-green-50",
-                isPopular && !isActive && "border-purple-500 shadow-lg",
-                !isActive && !isPopular && "border-gray-200 hover:border-gray-300"
+                'relative bg-white rounded-lg border-2 p-6 transition-all duration-200',
+                isActive && 'border-green-500 bg-green-50',
+                isPopular && !isActive && 'border-purple-500 shadow-lg',
+                !isActive &&
+                  !isPopular &&
+                  'border-gray-200 hover:border-gray-300'
               )}
             >
               {/* Popular Badge */}
@@ -170,20 +176,18 @@ export const SubscriptionPlans: React.FC<SubscriptionPlansProps> = ({
 
               {/* Plan Header */}
               <div className="text-center mb-6">
-                <Icon 
+                <Icon
                   className={cn(
-                    "h-8 w-8 mx-auto mb-3",
-                    isActive && "text-green-600",
-                    isPopular && !isActive && "text-purple-600",
-                    !isActive && !isPopular && "text-gray-600"
+                    'h-8 w-8 mx-auto mb-3',
+                    isActive && 'text-green-600',
+                    isPopular && !isActive && 'text-purple-600',
+                    !isActive && !isPopular && 'text-gray-600'
                   )}
                 />
                 <h3 className="text-xl font-semibold text-gray-900 mb-1">
                   {plan.displayName}
                 </h3>
-                <p className="text-gray-600 text-sm">
-                  {plan.description}
-                </p>
+                <p className="text-gray-600 text-sm">{plan.description}</p>
               </div>
 
               {/* Price */}
@@ -206,19 +210,17 @@ export const SubscriptionPlans: React.FC<SubscriptionPlansProps> = ({
                 <li className="flex items-center text-sm">
                   <Check className="h-4 w-4 text-green-500 mr-3 flex-shrink-0" />
                   <span>
-                    {plan.features.maxChatsPerDay === -1 
-                      ? 'Неограниченные чаты' 
-                      : `${plan.features.maxChatsPerDay} чатов в день`
-                    }
+                    {plan.features.maxChatsPerDay === -1
+                      ? 'Неограниченные чаты'
+                      : `${plan.features.maxChatsPerDay} чатов в день`}
                   </span>
                 </li>
                 <li className="flex items-center text-sm">
                   <Check className="h-4 w-4 text-green-500 mr-3 flex-shrink-0" />
                   <span>
-                    {plan.features.maxMessagesPerMonth === -1 
-                      ? 'Неограниченные сообщения' 
-                      : `${plan.features.maxMessagesPerMonth} сообщений в месяц`
-                    }
+                    {plan.features.maxMessagesPerMonth === -1
+                      ? 'Неограниченные сообщения'
+                      : `${plan.features.maxMessagesPerMonth} сообщений в месяц`}
                   </span>
                 </li>
                 {plan.features.nsfwContent && (
@@ -284,19 +286,26 @@ export const SubscriptionPlans: React.FC<SubscriptionPlansProps> = ({
             <div>
               <span className="text-gray-600">Статус:</span>
               <span className="ml-2 font-medium">
-                {currentSubscription.status === 'active' ? 'Активна' : 'Неактивна'}
+                {currentSubscription.status === 'active'
+                  ? 'Активна'
+                  : 'Неактивна'}
               </span>
             </div>
             <div>
               <span className="text-gray-600">Следующее списание:</span>
               <span className="ml-2 font-medium">
-                {new Date(currentSubscription.currentPeriodEnd).toLocaleDateString('ru-RU')}
+                {new Date(
+                  currentSubscription.currentPeriodEnd
+                ).toLocaleDateString('ru-RU')}
               </span>
             </div>
           </div>
           {currentSubscription.cancelAtPeriodEnd && (
             <p className="text-yellow-600 text-sm mt-2">
-              Подписка будет отменена {new Date(currentSubscription.currentPeriodEnd).toLocaleDateString('ru-RU')}
+              Подписка будет отменена{' '}
+              {new Date(
+                currentSubscription.currentPeriodEnd
+              ).toLocaleDateString('ru-RU')}
             </p>
           )}
         </div>

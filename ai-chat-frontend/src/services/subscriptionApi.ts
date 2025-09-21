@@ -138,7 +138,9 @@ export const getSubscription = async (): Promise<Subscription | null> => {
  * Получить все доступные планы подписки
  */
 export const getPlans = async (): Promise<SubscriptionPlan[]> => {
-  const response = await get<{ plans: SubscriptionPlan[] }>('/subscription/plans');
+  const response = await get<{ plans: SubscriptionPlan[] }>(
+    '/subscription/plans'
+  );
   return response.plans;
 };
 
@@ -160,7 +162,7 @@ export const subscribe = async (
   const data = {
     planId,
     paymentMethodId,
-    promoCode
+    promoCode,
   };
   return await post<Subscription>('/subscription/subscribe', data);
 };
@@ -170,11 +172,14 @@ export const subscribe = async (
  */
 export const changePlan = async (
   newPlanId: string,
-  prorationBehavior: 'none' | 'create_prorations' | 'always_invoice' = 'create_prorations'
+  prorationBehavior:
+    | 'none'
+    | 'create_prorations'
+    | 'always_invoice' = 'create_prorations'
 ): Promise<Subscription> => {
   const data = {
     planId: newPlanId,
-    prorationBehavior
+    prorationBehavior,
   };
   return await patch<Subscription>('/subscription', data);
 };
@@ -188,7 +193,7 @@ export const cancelSubscription = async (
 ): Promise<void> => {
   const data = {
     cancelAtPeriodEnd,
-    reason
+    reason,
   };
   await post('/subscription/cancel', data);
 };
@@ -213,21 +218,27 @@ export const pauseSubscription = async (
 /**
  * Получить промо-коды пользователя
  */
-export const getUserPromoCodes = async (): Promise<{
-  id: string;
-  code: string;
-  discountPercent: number;
-  validUntil: string;
-  isUsed: boolean;
-}[]> => {
-  const response = await get<{ promoCodes: any[] }>('/subscription/promo-codes');
+export const getUserPromoCodes = async (): Promise<
+  {
+    id: string;
+    code: string;
+    discountPercent: number;
+    validUntil: string;
+    isUsed: boolean;
+  }[]
+> => {
+  const response = await get<{ promoCodes: any[] }>(
+    '/subscription/promo-codes'
+  );
   return response.promoCodes;
 };
 
 /**
  * Применить промо-код
  */
-export const applyPromoCode = async (code: string): Promise<{
+export const applyPromoCode = async (
+  code: string
+): Promise<{
   valid: boolean;
   discountPercent: number;
   validUntil: string;
@@ -241,7 +252,9 @@ export const applyPromoCode = async (code: string): Promise<{
  * Получить все методы оплаты пользователя
  */
 export const getPaymentMethods = async (): Promise<PaymentMethod[]> => {
-  const response = await get<{ paymentMethods: PaymentMethod[] }>('/payment/methods');
+  const response = await get<{ paymentMethods: PaymentMethod[] }>(
+    '/payment/methods'
+  );
   return response.paymentMethods;
 };
 
@@ -274,14 +287,18 @@ export const deletePaymentMethod = async (methodId: string): Promise<void> => {
 /**
  * Установить метод оплаты по умолчанию
  */
-export const setDefaultPaymentMethod = async (methodId: string): Promise<void> => {
+export const setDefaultPaymentMethod = async (
+  methodId: string
+): Promise<void> => {
   await post(`/payment/methods/${methodId}/set-default`);
 };
 
 /**
  * Проверить валидность метода оплаты
  */
-export const validatePaymentMethod = async (methodId: string): Promise<{
+export const validatePaymentMethod = async (
+  methodId: string
+): Promise<{
   valid: boolean;
   errors?: string[];
 }> => {
@@ -299,13 +316,17 @@ export const getPaymentHistory = async (
   status?: PaymentHistory['status']
 ): Promise<PaginatedResponse<PaymentHistory>> => {
   const params = { page, limit, status };
-  return await get<PaginatedResponse<PaymentHistory>>('/payment/history', { params });
+  return await get<PaginatedResponse<PaymentHistory>>('/payment/history', {
+    params,
+  });
 };
 
 /**
  * Получить конкретный платеж
  */
-export const getPayment = async (paymentId: string): Promise<PaymentHistory> => {
+export const getPayment = async (
+  paymentId: string
+): Promise<PaymentHistory> => {
   return await get<PaymentHistory>(`/payment/history/${paymentId}`);
 };
 
@@ -314,7 +335,7 @@ export const getPayment = async (paymentId: string): Promise<PaymentHistory> => 
  */
 export const downloadInvoice = async (invoiceId: string): Promise<Blob> => {
   const response = await get(`/billing/invoices/${invoiceId}/download`, {
-    responseType: 'blob'
+    responseType: 'blob',
   });
   return response as unknown as Blob;
 };
@@ -325,18 +346,20 @@ export const downloadInvoice = async (invoiceId: string): Promise<Blob> => {
 export const getInvoices = async (
   page: number = 1,
   limit: number = 20
-): Promise<PaginatedResponse<{
-  id: string;
-  number: string;
-  status: 'draft' | 'open' | 'paid' | 'void' | 'uncollectible';
-  amount: number;
-  currency: string;
-  dueDate: string;
-  paidAt?: string;
-  invoiceUrl: string;
-  downloadUrl: string;
-  createdAt: string;
-}>> => {
+): Promise<
+  PaginatedResponse<{
+    id: string;
+    number: string;
+    status: 'draft' | 'open' | 'paid' | 'void' | 'uncollectible';
+    amount: number;
+    currency: string;
+    dueDate: string;
+    paidAt?: string;
+    invoiceUrl: string;
+    downloadUrl: string;
+    createdAt: string;
+  }>
+> => {
   const params = { page, limit };
   return await get<PaginatedResponse<any>>('/billing/invoices', { params });
 };
@@ -383,7 +406,7 @@ export const createPaymentIntent = async (
   const data = {
     planId,
     paymentMethodId,
-    promoCode
+    promoCode,
   };
   return await post('/stripe/payment-intent', data);
 };
@@ -395,13 +418,17 @@ export const confirmPayment = async (
   paymentIntentId: string,
   paymentMethodId?: string
 ): Promise<{
-  status: 'succeeded' | 'requires_action' | 'requires_payment_method' | 'failed';
+  status:
+    | 'succeeded'
+    | 'requires_action'
+    | 'requires_payment_method'
+    | 'failed';
   subscription?: Subscription;
   error?: string;
 }> => {
   const data = {
     paymentIntentId,
-    paymentMethodId
+    paymentMethodId,
   };
   return await post('/stripe/confirm-payment', data);
 };
@@ -488,21 +515,23 @@ export const formatPrice = (
   return new Intl.NumberFormat(locale, {
     style: 'currency',
     currency: currency.toUpperCase(),
-    minimumFractionDigits: amount % 1 === 0 ? 0 : 2
+    minimumFractionDigits: amount % 1 === 0 ? 0 : 2,
   }).format(amount);
 };
 
 /**
  * Получить статус подписки на русском языке
  */
-export const getSubscriptionStatusText = (status: Subscription['status']): string => {
+export const getSubscriptionStatusText = (
+  status: Subscription['status']
+): string => {
   const statusMap = {
     active: 'Активная',
     canceled: 'Отменена',
     past_due: 'Просрочена',
     unpaid: 'Неоплачена',
     trialing: 'Пробный период',
-    paused: 'Приостановлена'
+    paused: 'Приостановлена',
   };
   return statusMap[status] || status;
 };
@@ -534,27 +563,29 @@ export const getDaysUntilExpiry = (subscription: Subscription): number => {
 /**
  * Проверить, нужно ли обновить подписку
  */
-export const shouldUpgrade = (usage: UsageStats): {
+export const shouldUpgrade = (
+  usage: UsageStats
+): {
   shouldUpgrade: boolean;
   reasons: string[];
 } => {
   const reasons: string[] = [];
-  
+
   if (usage.chatsToday >= usage.limits.maxChatsPerDay * 0.8) {
     reasons.push('Приближается лимит чатов на день');
   }
-  
+
   if (usage.messagesThisMonth >= usage.limits.maxMessagesPerMonth * 0.8) {
     reasons.push('Приближается лимит сообщений на месяц');
   }
-  
+
   if (usage.storageUsed >= usage.limits.maxStorageMB * 0.8) {
     reasons.push('Заканчивается место для хранения');
   }
-  
+
   return {
     shouldUpgrade: reasons.length > 0,
-    reasons
+    reasons,
   };
 };
 
@@ -569,11 +600,11 @@ export default {
   cancelSubscription,
   resumeSubscription,
   pauseSubscription,
-  
+
   // Promo codes
   getUserPromoCodes,
   applyPromoCode,
-  
+
   // Payment methods
   getPaymentMethods,
   addPaymentMethod,
@@ -581,7 +612,7 @@ export default {
   deletePaymentMethod,
   setDefaultPaymentMethod,
   validatePaymentMethod,
-  
+
   // Billing
   getPaymentHistory,
   getPayment,
@@ -589,23 +620,23 @@ export default {
   getInvoices,
   getUsageStats,
   getUpcomingInvoice,
-  
+
   // Stripe integration
   createPaymentIntent,
   confirmPayment,
   createSetupIntent,
   getCustomerPortalUrl,
-  
+
   // Analytics
   getSubscriptionAnalytics,
   getBillingDetails,
-  
+
   // Utilities
   formatPrice,
   getSubscriptionStatusText,
   hasFeatureAccess,
   getDaysUntilExpiry,
-  shouldUpgrade
+  shouldUpgrade,
 };
 
 // Экспорт типов
@@ -615,5 +646,5 @@ export type {
   PaymentMethod,
   PaymentHistory,
   PaymentMethodData,
-  UsageStats
+  UsageStats,
 };

@@ -1,7 +1,7 @@
 // UI компоненты
 export * from './ui';
 
-// Auth компоненты  
+// Auth компоненты
 export * from './auth';
 
 // Chat компоненты

@@ -1,0 +1,68 @@
+# Исключения для Docker сборки
+# Зависимости
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Сборка
+dist/
+build/
+
+# Тесты
+coverage/
+*.test.js
+*.test.ts
+*.test.tsx
+**/__tests__/
+**/*.spec.js
+**/*.spec.ts
+**/*.spec.tsx
+
+# Окружения
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Git
+.git/
+.gitignore
+
+# Docker
+Dockerfile*
+docker-compose*.yml
+.dockerignore
+
+# Документация
+README.md
+docs/
+*.md
+
+# Конфигурации разработки
+.eslintrc*
+.prettierrc*
+jest.config.*
+tsconfig.json
+vite.config.*
+tailwind.config.*
+postcss.config.*
+
+# Логи
+*.log
+
+# Временные файлы
+.tmp/
+.cache/

@@ -38,11 +38,12 @@ const TypingIndicator: React.FC<TypingIndicatorProps> = ({
       friendly: ['печатает', 'набирает ответ', 'отвечает'],
       mysterious: ['думает', 'размышляет', 'обдумывает ответ'],
       professional: ['печатает', 'формулирует ответ', 'готовит ответ'],
-      playful: ['что-то придумывает', 'сочиняет', 'печатает']
+      playful: ['что-то придумывает', 'сочиняет', 'печатает'],
     };
-    
+
     const phraseList = phrases[personality];
-    const randomPhrase = phraseList[Math.floor(Math.random() * phraseList.length)];
+    const randomPhrase =
+      phraseList[Math.floor(Math.random() * phraseList.length)];
     return `${characterName} ${randomPhrase}`;
   };
 
@@ -86,7 +87,7 @@ const TypingIndicator: React.FC<TypingIndicatorProps> = ({
                 <span className="text-white/90 text-sm font-medium truncate">
                   {getTypingText()}
                 </span>
-                
+
                 {/* Animated Dots */}
                 <div className="flex items-center space-x-0.5 ml-1">
                   {[1, 2, 3].map((dotIndex) => (
@@ -97,7 +98,7 @@ const TypingIndicator: React.FC<TypingIndicatorProps> = ({
                         dotIndex <= dotCount ? 'opacity-100' : 'opacity-30'
                       )}
                       style={{
-                        transitionDelay: `${dotIndex * 100}ms`
+                        transitionDelay: `${dotIndex * 100}ms`,
                       }}
                     />
                   ))}
@@ -152,11 +153,11 @@ export const useTypingIndicator = (autoHideTimeout: number = 3000) => {
 
   const showTyping = useCallback(() => {
     setIsTyping(true);
-    
+
     if (timeoutRef.current) {
       clearTimeout(timeoutRef.current);
     }
-    
+
     timeoutRef.current = setTimeout(() => {
       setIsTyping(false);
     }, autoHideTimeout);
@@ -189,7 +190,7 @@ export const useTypingIndicator = (autoHideTimeout: number = 3000) => {
     isTyping,
     showTyping,
     hideTyping,
-    toggleTyping
+    toggleTyping,
   };
 };
 
@@ -204,11 +205,9 @@ interface MultipleTypingIndicatorProps {
   className?: string;
 }
 
-export const MultipleTypingIndicator: React.FC<MultipleTypingIndicatorProps> = ({
-  typingUsers,
-  maxVisible = 3,
-  className = ''
-}) => {
+export const MultipleTypingIndicator: React.FC<
+  MultipleTypingIndicatorProps
+> = ({ typingUsers, maxVisible = 3, className = '' }) => {
   if (typingUsers.length === 0) return null;
 
   const visibleUsers = typingUsers.slice(0, maxVisible);
@@ -220,12 +219,14 @@ export const MultipleTypingIndicator: React.FC<MultipleTypingIndicatorProps> = (
     } else if (typingUsers.length === 2) {
       return `${typingUsers[0].name} и ${typingUsers[1].name} печатают...`;
     } else {
-      return `${visibleUsers.map(u => u.name).join(', ')}${hiddenCount > 0 ? ` и еще ${hiddenCount}` : ''} печатают...`;
+      return `${visibleUsers.map((u) => u.name).join(', ')}${hiddenCount > 0 ? ` и еще ${hiddenCount}` : ''} печатают...`;
     }
   };
 
   return (
-    <div className={`flex items-center space-x-2 px-4 py-2 bg-gray-100 rounded-lg ${className}`}>
+    <div
+      className={`flex items-center space-x-2 px-4 py-2 bg-gray-100 rounded-lg ${className}`}
+    >
       <div className="flex -space-x-1">
         {visibleUsers.map((user) => (
           <div
@@ -233,20 +234,33 @@ export const MultipleTypingIndicator: React.FC<MultipleTypingIndicatorProps> = (
             className="w-6 h-6 rounded-full bg-gray-300 border-2 border-white flex items-center justify-center text-xs font-semibold text-gray-600"
           >
             {user.avatar ? (
-              <img src={user.avatar} alt={user.name} className="w-full h-full rounded-full object-cover" />
+              <img
+                src={user.avatar}
+                alt={user.name}
+                className="w-full h-full rounded-full object-cover"
+              />
             ) : (
               user.name.charAt(0).toUpperCase()
             )}
           </div>
         ))}
       </div>
-      
+
       <div className="flex items-center space-x-2">
         <span className="text-sm text-gray-600">{getTypingText()}</span>
         <div className="flex space-x-1">
-          <div className="w-1.5 h-1.5 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0ms' }}></div>
-          <div className="w-1.5 h-1.5 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '150ms' }}></div>
-          <div className="w-1.5 h-1.5 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '300ms' }}></div>
+          <div
+            className="w-1.5 h-1.5 bg-gray-400 rounded-full animate-bounce"
+            style={{ animationDelay: '0ms' }}
+          ></div>
+          <div
+            className="w-1.5 h-1.5 bg-gray-400 rounded-full animate-bounce"
+            style={{ animationDelay: '150ms' }}
+          ></div>
+          <div
+            className="w-1.5 h-1.5 bg-gray-400 rounded-full animate-bounce"
+            style={{ animationDelay: '300ms' }}
+          ></div>
         </div>
       </div>
     </div>

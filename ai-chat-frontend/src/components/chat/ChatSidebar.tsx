@@ -1,5 +1,20 @@
-import React, { useState, useEffect, useMemo, useRef, useCallback } from 'react';
-import { Search, Plus, X, MoreHorizontal, Archive, Trash2, Edit2 } from 'lucide-react';
+import React, {
+  useState,
+  useEffect,
+  useMemo,
+  useRef,
+  useCallback,
+} from 'react';
+import {
+  Search,
+  Plus,
+  X,
+  MoreHorizontal,
+  Archive,
+  Trash2,
+  Edit2,
+} from 'lucide-react';
+import { Sparkles } from 'lucide-react';
 import { cn } from '../../utils';
 import Button from '../ui/Button';
 import Input from '../ui/Input';
@@ -23,6 +38,7 @@ interface ChatSidebarProps {
   onSelectChat: (chatId: string) => void;
   activeChatId?: string;
   className?: string;
+  onOpenCharacterCreator?: () => void;
 }
 
 // Группировка чатов по дате
@@ -34,7 +50,7 @@ const groupChatsByDate = (chats: Chat[]) => {
 
   return chats.reduce((groups: Record<string, Chat[]>, chat) => {
     const chatDate = new Date(chat.timestamp);
-    
+
     let group: string;
     if (chatDate >= today) {
       group = 'Сегодня';
@@ -83,13 +99,19 @@ const ChatItem: React.FC<ChatItemProps> = ({
   const formatTime = (date: Date) => {
     const now = new Date();
     const diff = now.getTime() - date.getTime();
-    
+
     if (diff < 24 * 60 * 60 * 1000) {
-      return date.toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' });
+      return date.toLocaleTimeString('ru-RU', {
+        hour: '2-digit',
+        minute: '2-digit',
+      });
     } else if (diff < 7 * 24 * 60 * 60 * 1000) {
       return date.toLocaleDateString('ru-RU', { weekday: 'short' });
     } else {
-      return date.toLocaleDateString('ru-RU', { day: 'numeric', month: 'short' });
+      return date.toLocaleDateString('ru-RU', {
+        day: 'numeric',
+        month: 'short',
+      });
     }
   };
 
@@ -101,10 +123,10 @@ const ChatItem: React.FC<ChatItemProps> = ({
 
   const handleTouchMove = (e: React.TouchEvent) => {
     if (!isDragging) return;
-    
+
     const currentX = e.touches[0].clientX;
     const diff = startX.current - currentX;
-    
+
     if (diff > 0 && diff < 100) {
       setSwipeOffset(diff);
     }
@@ -112,11 +134,11 @@ const ChatItem: React.FC<ChatItemProps> = ({
 
   const handleTouchEnd = () => {
     setIsDragging(false);
-    
+
     if (swipeOffset > 60) {
       onDelete(chat.id);
     }
-    
+
     setSwipeOffset(0);
   };
 
@@ -154,7 +176,7 @@ const ChatItem: React.FC<ChatItemProps> = ({
               </span>
             </div>
           )}
-          
+
           {/* Unread indicator */}
           {chat.unreadCount > 0 && (
             <div className="absolute -mt-2 -mr-2 w-5 h-5 bg-red-500 rounded-full flex items-center justify-center">
@@ -168,17 +190,19 @@ const ChatItem: React.FC<ChatItemProps> = ({
         {/* Chat Info */}
         <div className="flex-1 min-w-0">
           <div className="flex items-center justify-between">
-            <h3 className={cn(
-              'font-medium text-sm truncate',
-              isActive ? 'text-blue-900' : 'text-gray-900'
-            )}>
+            <h3
+              className={cn(
+                'font-medium text-sm truncate',
+                isActive ? 'text-blue-900' : 'text-gray-900'
+              )}
+            >
               {chat.title}
             </h3>
             <span className="text-xs text-gray-500 flex-shrink-0 ml-2">
               {formatTime(chat.timestamp)}
             </span>
           </div>
-          
+
           <p className="text-xs text-gray-500 truncate mt-1">
             {chat.lastMessage}
           </p>
@@ -214,7 +238,7 @@ const ChatItem: React.FC<ChatItemProps> = ({
             <Edit2 className="w-3 h-3" />
             <span>Переименовать</span>
           </button>
-          
+
           <button
             className="w-full px-3 py-2 text-left text-sm hover:bg-gray-50 flex items-center space-x-2"
             onClick={(e) => {
@@ -226,7 +250,7 @@ const ChatItem: React.FC<ChatItemProps> = ({
             <Archive className="w-3 h-3" />
             <span>Архивировать</span>
           </button>
-          
+
           <button
             className="w-full px-3 py-2 text-left text-sm hover:bg-gray-50 text-red-600 flex items-center space-x-2"
             onClick={(e) => {
@@ -243,7 +267,7 @@ const ChatItem: React.FC<ChatItemProps> = ({
 
       {/* Swipe Delete Button */}
       {swipeOffset > 0 && (
-        <div 
+        <div
           className="absolute right-0 top-0 h-full bg-red-500 flex items-center justify-center px-4"
           style={{ width: `${swipeOffset}px` }}
         >
@@ -261,6 +285,7 @@ const ChatSidebar: React.FC<ChatSidebarProps> = ({
   onSelectChat,
   activeChatId,
   className,
+  onOpenCharacterCreator,
 }) => {
   const [searchQuery, setSearchQuery] = useState('');
   const [chats, setChats] = useState<Chat[]>([]);
@@ -276,25 +301,31 @@ const ChatSidebar: React.FC<ChatSidebarProps> = ({
       title: `Чат с персонажем ${i + 1}`,
       characterId: `char-${i}`,
       characterName: `Персонаж ${i + 1}`,
-      characterAvatar: i % 3 === 0 ? undefined : `https://api.dicebear.com/7.x/avataaars/svg?seed=${i}`,
+      characterAvatar:
+        i % 3 === 0
+          ? undefined
+          : `https://api.dicebear.com/7.x/avataaars/svg?seed=${i}`,
       lastMessage: `Последнее сообщение в чате ${i + 1}...`,
       timestamp: new Date(Date.now() - i * 60 * 60 * 1000),
       unreadCount: i % 4 === 0 ? Math.floor(Math.random() * 5) : 0,
       isArchived: false,
     }));
-    
+
     setChats(mockChats);
   }, []);
 
   // Фильтрация чатов по поиску
   const filteredChats = useMemo(() => {
-    if (!searchQuery.trim()) return chats.filter(chat => !chat.isArchived);
-    
-    return chats.filter(chat => 
-      !chat.isArchived && 
-      (chat.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-       chat.characterName.toLowerCase().includes(searchQuery.toLowerCase()) ||
-       chat.lastMessage.toLowerCase().includes(searchQuery.toLowerCase()))
+    if (!searchQuery.trim()) return chats.filter((chat) => !chat.isArchived);
+
+    return chats.filter(
+      (chat) =>
+        !chat.isArchived &&
+        (chat.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+          chat.characterName
+            .toLowerCase()
+            .includes(searchQuery.toLowerCase()) ||
+          chat.lastMessage.toLowerCase().includes(searchQuery.toLowerCase()))
     );
   }, [chats, searchQuery]);
 
@@ -306,10 +337,14 @@ const ChatSidebar: React.FC<ChatSidebarProps> = ({
   // Infinite scroll
   const handleScroll = useCallback(() => {
     if (!scrollRef.current) return;
-    
+
     const { scrollTop, scrollHeight, clientHeight } = scrollRef.current;
-    
-    if (scrollTop + clientHeight >= scrollHeight - 100 && hasMore && !isLoading) {
+
+    if (
+      scrollTop + clientHeight >= scrollHeight - 100 &&
+      hasMore &&
+      !isLoading
+    ) {
       setIsLoading(true);
       // TODO: Загрузить больше чатов
       setTimeout(() => {
@@ -325,13 +360,15 @@ const ChatSidebar: React.FC<ChatSidebarProps> = ({
   };
 
   const handleArchive = (chatId: string) => {
-    setChats(prev => prev.map(chat => 
-      chat.id === chatId ? { ...chat, isArchived: true } : chat
-    ));
+    setChats((prev) =>
+      prev.map((chat) =>
+        chat.id === chatId ? { ...chat, isArchived: true } : chat
+      )
+    );
   };
 
   const handleDelete = (chatId: string) => {
-    setChats(prev => prev.filter(chat => chat.id !== chatId));
+    setChats((prev) => prev.filter((chat) => chat.id !== chatId));
   };
 
   const handleRename = (chatId: string) => {
@@ -350,7 +387,7 @@ const ChatSidebar: React.FC<ChatSidebarProps> = ({
     <>
       {/* Mobile backdrop */}
       {isOpen && (
-        <div 
+        <div
           className="fixed inset-0 bg-black/50 z-40 lg:hidden"
           onClick={handleBackdropClick}
         />
@@ -369,7 +406,7 @@ const ChatSidebar: React.FC<ChatSidebarProps> = ({
         {/* Header */}
         <div className="flex items-center justify-between p-4 border-b border-gray-200">
           <h2 className="text-lg font-semibold text-gray-900">Чаты</h2>
-          
+
           <div className="flex items-center space-x-2">
             <Button
               variant="ghost"
@@ -380,7 +417,18 @@ const ChatSidebar: React.FC<ChatSidebarProps> = ({
             >
               <Plus className="w-4 h-4" />
             </Button>
-            
+            {onOpenCharacterCreator && (
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => onOpenCharacterCreator()}
+                className="p-2"
+                title="Создать персонажа"
+              >
+                <Sparkles className="w-4 h-4 text-indigo-600" />
+              </Button>
+            )}
+
             {/* Close button (mobile only) */}
             <Button
               variant="ghost"
@@ -408,7 +456,7 @@ const ChatSidebar: React.FC<ChatSidebarProps> = ({
         </div>
 
         {/* Chat List */}
-        <div 
+        <div
           ref={scrollRef}
           className="flex-1 overflow-y-auto"
           onScroll={handleScroll}

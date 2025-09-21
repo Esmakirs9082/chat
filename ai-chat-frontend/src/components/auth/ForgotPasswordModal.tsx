@@ -15,7 +15,11 @@ interface ForgotPasswordModalProps {
 
 const RESEND_TIMEOUT = 60; // секунд
 
-const ForgotPasswordModal: React.FC<ForgotPasswordModalProps> = ({ isOpen, onClose, onBackToLogin }) => {
+const ForgotPasswordModal: React.FC<ForgotPasswordModalProps> = ({
+  isOpen,
+  onClose,
+  onBackToLogin,
+}) => {
   const [email, setEmail] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
@@ -76,25 +80,42 @@ const ForgotPasswordModal: React.FC<ForgotPasswordModalProps> = ({ isOpen, onClo
   };
 
   return (
-  <Modal isOpen={isOpen} onClose={handleClose} size="md" title="Восстановление пароля">
+    <Modal
+      isOpen={isOpen}
+      onClose={handleClose}
+      size="md"
+      title="Восстановление пароля"
+    >
       <div className="p-4">
         {!success ? (
           <form onSubmit={handleSubmit} className="space-y-4">
-            <div className="text-gray-700 mb-2">Мы отправим ссылку для восстановления на ваш email.</div>
+            <div className="text-gray-700 mb-2">
+              Мы отправим ссылку для восстановления на ваш email.
+            </div>
             <Input
               label="Email"
               type="email"
               value={email}
-              onChange={e => setEmail(e.target.value)}
+              onChange={(e) => setEmail(e.target.value)}
               error={error ?? undefined}
               required
               autoFocus
             />
-            <Button type="submit" disabled={loading || timer > 0} className="w-full">
-              {timer > 0 ? `Отправить повторно через ${timer} сек` : 'Отправить ссылку'}
+            <Button
+              type="submit"
+              disabled={loading || timer > 0}
+              className="w-full"
+            >
+              {timer > 0
+                ? `Отправить повторно через ${timer} сек`
+                : 'Отправить ссылку'}
             </Button>
             <div className="flex justify-between mt-2">
-              <button type="button" className="text-indigo-600 hover:underline" onClick={onBackToLogin}>
+              <button
+                type="button"
+                className="text-indigo-600 hover:underline"
+                onClick={onBackToLogin}
+              >
                 Вернуться к входу
               </button>
             </div>
@@ -104,16 +125,40 @@ const ForgotPasswordModal: React.FC<ForgotPasswordModalProps> = ({ isOpen, onClo
             <div className="mb-4">
               <svg width="48" height="48" fill="none" viewBox="0 0 48 48">
                 <circle cx="24" cy="24" r="22" fill="#e6fbe6" />
-                <path d="M16 24l6 6 10-10" stroke="#22c55e" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" />
+                <path
+                  d="M16 24l6 6 10-10"
+                  stroke="#22c55e"
+                  strokeWidth="3"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
               </svg>
             </div>
-            <h2 className="text-lg font-bold text-green-600 mb-2">Проверьте почту</h2>
-            <div className="text-gray-700 mb-4">Ссылка для восстановления отправлена на <span className="font-medium">{email}</span>.</div>
-            <div className="text-sm text-gray-500 mb-4">Следуйте инструкции в письме для сброса пароля.</div>
-            <Button type="button" disabled={timer > 0 || loading} onClick={handleResend} className="mb-2">
-              {timer > 0 ? `Отправить повторно через ${timer} сек` : 'Не пришло письмо? Отправить повторно'}
+            <h2 className="text-lg font-bold text-green-600 mb-2">
+              Проверьте почту
+            </h2>
+            <div className="text-gray-700 mb-4">
+              Ссылка для восстановления отправлена на{' '}
+              <span className="font-medium">{email}</span>.
+            </div>
+            <div className="text-sm text-gray-500 mb-4">
+              Следуйте инструкции в письме для сброса пароля.
+            </div>
+            <Button
+              type="button"
+              disabled={timer > 0 || loading}
+              onClick={handleResend}
+              className="mb-2"
+            >
+              {timer > 0
+                ? `Отправить повторно через ${timer} сек`
+                : 'Не пришло письмо? Отправить повторно'}
             </Button>
-            <button type="button" className="text-indigo-600 hover:underline mt-2" onClick={onBackToLogin}>
+            <button
+              type="button"
+              className="text-indigo-600 hover:underline mt-2"
+              onClick={onBackToLogin}
+            >
               Вернуться к входу
             </button>
           </div>

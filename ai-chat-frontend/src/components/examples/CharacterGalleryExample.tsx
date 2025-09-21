@@ -9,7 +9,7 @@ import {
   getCharacterStats,
   characterLoader,
   type CharacterFilters,
-  type CharacterStats
+  type CharacterStats,
 } from '../../services/characterApi';
 import { Character } from '../../types';
 
@@ -20,11 +20,18 @@ export const CharacterGalleryExample: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [filters, setFilters] = useState<CharacterFilters>({});
   const [currentPage, setCurrentPage] = useState(1);
-  const [selectedCharacter, setSelectedCharacter] = useState<Character | null>(null);
-  const [characterStats, setCharacterStats] = useState<CharacterStats | null>(null);
+  const [selectedCharacter, setSelectedCharacter] = useState<Character | null>(
+    null
+  );
+  const [characterStats, setCharacterStats] = useState<CharacterStats | null>(
+    null
+  );
 
   // Загрузка персонажей с пагинацией
-  const loadCharacters = async (page: number = 1, newFilters?: CharacterFilters) => {
+  const loadCharacters = async (
+    page: number = 1,
+    newFilters?: CharacterFilters
+  ) => {
     try {
       setLoading(true);
       const response = await getCharacters(newFilters || filters, page, 12);
@@ -43,10 +50,16 @@ export const CharacterGalleryExample: React.FC = () => {
       loadCharacters(1);
       return;
     }
-    
+
     try {
       setLoading(true);
-      const results = await searchCharacters(query, filters, 'relevance', 1, 12);
+      const results = await searchCharacters(
+        query,
+        filters,
+        'relevance',
+        1,
+        12
+      );
       setCharacters(results);
     } catch (error) {
       console.error('Ошибка поиска:', error);
@@ -59,9 +72,11 @@ export const CharacterGalleryExample: React.FC = () => {
   const handleCharacterSelect = async (character: Character) => {
     try {
       // Используем characterLoader для кэширования
-      const detailedCharacter = await characterLoader.loadCharacter(character.id);
+      const detailedCharacter = await characterLoader.loadCharacter(
+        character.id
+      );
       setSelectedCharacter(detailedCharacter);
-      
+
       // Загружаем статистику
       const stats = await getCharacterStats(character.id);
       setCharacterStats(stats);
@@ -75,11 +90,13 @@ export const CharacterGalleryExample: React.FC = () => {
     try {
       await toggleFavorite(characterId);
       // Обновляем локальное состояние
-      setCharacters(prev => prev.map(char => 
-        char.id === characterId 
-          ? { ...char, /* isFavorite: !char.isFavorite */ } // TODO: добавить поле isFavorite в тип Character
-          : char
-      ));
+      setCharacters((prev) =>
+        prev.map((char) =>
+          char.id === characterId
+            ? { ...char /* isFavorite: !char.isFavorite */ } // TODO: добавить поле isFavorite в тип Character
+            : char
+        )
+      );
     } catch (error) {
       console.error('Ошибка добавления в избранное:', error);
     }
@@ -89,17 +106,17 @@ export const CharacterGalleryExample: React.FC = () => {
   const handleAvatarUpload = async (characterId: string, file: File) => {
     try {
       const result = await uploadCharacterAvatar(
-        characterId, 
-        file, 
+        characterId,
+        file,
         (progress) => console.log(`Прогресс загрузки: ${progress}%`)
       );
-      
+
       // Обновляем аватар в локальном состоянии
-      setCharacters(prev => prev.map(char => 
-        char.id === characterId 
-          ? { ...char, avatar: result.avatarUrl }
-          : char
-      ));
+      setCharacters((prev) =>
+        prev.map((char) =>
+          char.id === characterId ? { ...char, avatar: result.avatarUrl } : char
+        )
+      );
     } catch (error) {
       console.error('Ошибка загрузки аватара:', error);
     }
@@ -136,7 +153,9 @@ export const CharacterGalleryExample: React.FC = () => {
         <div className="flex flex-wrap gap-4">
           <select
             value={filters.category || ''}
-            onChange={(e) => handleFilterChange({ category: e.target.value || undefined })}
+            onChange={(e) =>
+              handleFilterChange({ category: e.target.value || undefined })
+            }
             className="p-2 border border-gray-300 rounded"
           >
             <option value="">Все категории</option>
@@ -148,7 +167,11 @@ export const CharacterGalleryExample: React.FC = () => {
 
           <select
             value={filters.gender || ''}
-            onChange={(e) => handleFilterChange({ gender: e.target.value as any || undefined })}
+            onChange={(e) =>
+              handleFilterChange({
+                gender: (e.target.value as any) || undefined,
+              })
+            }
             className="p-2 border border-gray-300 rounded"
           >
             <option value="">Любой пол</option>
@@ -194,7 +217,7 @@ export const CharacterGalleryExample: React.FC = () => {
                     }}
                     className={`absolute top-2 right-2 p-2 rounded-full ${
                       false // character.isFavorite - TODO: добавить поле в тип Character
-                        ? 'bg-red-500 text-white' 
+                        ? 'bg-red-500 text-white'
                         : 'bg-gray-200 text-gray-600'
                     }`}
                   >
@@ -241,7 +264,7 @@ export const CharacterGalleryExample: React.FC = () => {
                 ×
               </button>
             </div>
-            
+
             <div className="flex gap-6">
               <div className="flex-shrink-0">
                 <img
@@ -249,7 +272,7 @@ export const CharacterGalleryExample: React.FC = () => {
                   alt={selectedCharacter.name}
                   className="w-48 h-48 object-cover rounded-lg"
                 />
-                
+
                 {/* Загрузка нового аватара (только если пользователь - создатель) */}
                 {false /* selectedCharacter.isOwner */ && ( // TODO: добавить поле isOwner в тип Character
                   <div className="mt-2">
@@ -267,10 +290,12 @@ export const CharacterGalleryExample: React.FC = () => {
                   </div>
                 )}
               </div>
-              
+
               <div className="flex-1">
-                <p className="text-gray-700 mb-4">{selectedCharacter.description}</p>
-                
+                <p className="text-gray-700 mb-4">
+                  {selectedCharacter.description}
+                </p>
+
                 {/* Статистика */}
                 {characterStats && (
                   <div className="stats mb-4 p-4 bg-gray-100 rounded">
@@ -283,7 +308,7 @@ export const CharacterGalleryExample: React.FC = () => {
                     </div>
                   </div>
                 )}
-                
+
                 {/* Теги */}
                 <div className="tags mb-4">
                   <h4 className="font-semibold mb-2">Теги:</h4>
@@ -298,20 +323,24 @@ export const CharacterGalleryExample: React.FC = () => {
                     ))}
                   </div>
                 </div>
-                
+
                 {/* Черты характера */}
                 {selectedCharacter.personality && (
                   <div className="personality">
                     <h4 className="font-semibold mb-2">Черты характера:</h4>
                     <div className="flex flex-wrap gap-2">
-                      {selectedCharacter.personality.map((trait: any, index: number) => (
-                        <span
-                          key={index}
-                          className="bg-green-100 text-green-700 px-2 py-1 rounded-full text-sm"
-                        >
-                          {typeof trait === 'string' ? trait : trait.trait || trait.name}
-                        </span>
-                      ))}
+                      {selectedCharacter.personality.map(
+                        (trait: any, index: number) => (
+                          <span
+                            key={index}
+                            className="bg-green-100 text-green-700 px-2 py-1 rounded-full text-sm"
+                          >
+                            {typeof trait === 'string'
+                              ? trait
+                              : trait.trait || trait.name}
+                          </span>
+                        )
+                      )}
                     </div>
                   </div>
                 )}
