@@ -2,7 +2,7 @@
 # Multi-stage build для оптимизации размера образа
 
 # Stage 1: Build stage
-FROM node:18-alpine AS builder
+FROM node:25-alpine AS builder
 
 # Установка рабочей директории
 WORKDIR /app
